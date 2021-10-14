@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdio>
 #include <vector>
+#include <algorithm>
 
 //Used to create stages
 class Stage {
@@ -41,6 +42,8 @@ void Stage::create_File(std::string SN, int code) {
   std::ofstream outfile {
     StageName + codeS + ".txt"
   };
+  outfile << StageName << std::endl;
+  outfile << stageNumber << std::endl;
   outfile << sF << std::endl;
   outfile << sISP << std::endl;
   outfile << sM0 << std::endl;
@@ -51,11 +54,10 @@ void Stage::create_File(std::string SN, int code) {
   outfile << sT << std::endl;
   outfile << sG << std::endl;
 
-	std::fstream fileNamePermanentStorage;
-	fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
-	//if (NOT (filenamePermanent storage already has StageName + StageNumber + ".txt")) {
-		fileNamePermanentStorage << StageName << stageNumber << ".txt\n";
-	//}
+  std::fstream fileNamePermanentStorage;
+  fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
+  fileNamePermanentStorage << StageName << stageNumber << ".txt\n";
+
 }
 
 //This will delete stages for clean-up
@@ -65,8 +67,6 @@ void Stage::remove_File(std::string SN, int code) {
     perror("Error deleting file");
   else
     puts("File successfully deleted");
-		//Find StageName + StageNumber + ".txt", and then remove it and move everything down
-		//Also, remove the stage from the vector idk how tho
 }
 
 //Used for stages, this can read a specific line in a file (NOT MADE BY ME)
@@ -125,27 +125,55 @@ void RecordInfo(double value, std::string input_name) {
   variablePermanentStorageOF.close();
 }
 
+//Used to remove speciic strings from a .txt file. This is to remove a duplicate from FileName Permanent Storage
+void erase_line(std::string fileName) {
+  std::string line, stringtobeSearched = fileName;
+  std::ifstream inFile("FileName Permanent Storage.txt");
+  std::ofstream outFile("output.txt");
+  if (inFile) {
+    while (getline(inFile, line, '\n')) {
+      //if the line read is not same as string searched for then write it into the output.txt file
+      if (line != stringtobeSearched) {
+        outFile << line << "\n";
+      }
+    }
+  } else {
+    std::cout << "File could not be read" << std::endl;
+  }
+  remove("FileName Permanent Storage.txt");
+  rename("output.txt", "FileName Permanent Storage.txt");
+}
+
 int main() {
-
-
   int choice;
-	int choiceBackup;
+  int choice2;
+  int choiceBackup;
+  int number_of_lines = 0;
+  int stageCount = 0;
+
   std::string stringChoice;
+  std::string line;
+
   double doubeChoice;
-  bool redoLoop = true;
   float floatChoice[10];
 
-  bool repeatStage = true;;
+  bool NotgoToMainMenu = true;
+  bool redoLoop = true;
+  bool boolChoice;
+  bool repeatStage = true;
+
+  std::vector < Stage > stageVector;
+
+  std::fstream FileNames;
+  FileNames.open("FileName Permanent Storage.txt");
 
   double G0, G, F, FLLS, ISP, M0, MF, CW, AEV; //G0 is standard gravity (9.80665 m/s/s), G is current gravity (m/s/s), F is fuel (l), FLLS is fuel lost (l/s), ISP is specific impulse (s), M0 is wet mass (t), MF is dry mass (t), CW is current weight (t), and AEV is average effective velocity (m/s) 
   double MoF, M1LF, FLKGS, EEV, A, TWR, DV; //Mof is Mass of Fuel (KG), M1LF is Mass of 1 liter of fuel (T), FLKGS is fuel lost (KG/S), EEV is effective exhaust velocity (M/S), A is acceleration (M/S/S), TWR is thrust to weight ratio, FLLS is fuel lost (L/s), and DV is delta V (M/S)
   double FAAN, AP, PAN, T; //FAAN is flow area at nozzle (m2), AP is ambient pressure (kPa), PAN is pressure at nozzle (kPa), and T is Thrust (KN), 
 
-  std::vector < Stage > stageVector;
-	//goes through filename permanent storage, opens the files, and then creates objects 
-	//for each one, so the vector is always accurate with the stages created
+  //goes through filename permanent storage, opens the files, and then creates objects 
+  //for each one, so the vector is always accurate with the stages created
 
-  std::string line;
   std::string variablelist[20] = {
     "G0",
     "G",
@@ -169,13 +197,64 @@ int main() {
     "T"
   };
 
+  while (std::getline(FileNames, line)) {
+    ++number_of_lines;
+  }
+
+  FileNames.clear();
+  FileNames.seekg(0);
+  for (int k = 0; k < number_of_lines; k++) {
+    GotoLine(FileNames, k + 1);
+    std::getline(FileNames, line);
+    std::ifstream StageFiles;
+    StageFiles.open(line);
+    Stage stageObject;
+    FileNames.clear();
+    FileNames.seekg(0);
+    std::getline(StageFiles, line);
+    stageObject.StageName = line;
+    std::getline(StageFiles, line);
+    stageObject.stageNumber = stoi(line);
+    // sF
+    std::getline(StageFiles, line);
+    stageObject.sF = stoi(line);
+    // sIsp
+    std::getline(StageFiles, line);
+    stageObject.sISP = stoi(line);
+    // sM0
+    std::getline(StageFiles, line);
+    stageObject.sM0 = stoi(line);
+    // sMF
+    std::getline(StageFiles, line);
+    stageObject.sMF = stoi(line);
+    // sA
+    std::getline(StageFiles, line);
+    stageObject.sA = stoi(line);
+    // sTWR
+    std::getline(StageFiles, line);
+    stageObject.sTWR = stoi(line);
+    // sDV
+    std::getline(StageFiles, line);
+    stageObject.sDV = stoi(line);
+    // sG
+    std::getline(StageFiles, line);
+    stageObject.sG = stoi(line);
+    // sT
+    std::getline(StageFiles, line);
+    stageObject.sT = stoi(line);
+
+    stageVector.push_back(stageObject);
+  }
+
   while (true) {
-  	std::cout << "\033[2J\033[0;0H";
+		// To reset the choice to quit or go back to main menu
+		NotgoToMainMenu = true;
+    std::cout << "\033[2J\033[0;0H";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     std::cout << "Welcome to ROCKET-X!\n";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
     std::cout << "This calculator is still in it's early form, so please forgive any lacking features.\n";
-    std::cout << "\nThis calculator has 2 views currently. 1 is calculations, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open.\n";
+    std::cout << "\nThis calculator has 2 views currently. 1 is calculations, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open. Enter 3 to quit.\n";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
     std::cin >> choice;
@@ -193,7 +272,8 @@ int main() {
       std::cout << "10) calculate Thrust (KN)\n\n";
       std::cout << "11) View all my values\n";
       std::cout << "12) Info\n";
-      std::cout << "13) Exit\n";
+      std::cout << "13) Exit back to main menu\n";
+      std::cout << "14) Exit ROCKET-X\n";
 
       std::cin >> choice;
 
@@ -203,9 +283,9 @@ int main() {
         std::cout << "2: Effective Exhaust Velocity, Wet mass, Dry mass\n";
         std::cin >> choice;
         if (choice == 1) {
-          std::cout << "You will need to enter Standard of Gravity (m/s), Specific Impulse (S), Wet Mass (t), and Dry mass (t).\n";
-          std::cout << "Start with Gravity (m/s): ";
-          G0 = UpdatedCin("G0 PermanentStorage", "Gravity (m/s)");
+          std::cout << "You will need to enter Standard of Gravity (m/s/s), Specific Impulse (S), Wet Mass (t), and Dry mass (t).\n";
+          std::cout << "Start with Gravity (m/s/s): ";
+          G0 = UpdatedCin("G0 PermanentStorage", "Gravity (m/s/s)");
           std::cout << std::endl << std::endl;
           std::cout << "Now enter Specific Impulse (S): ";
           ISP = UpdatedCin("ISP PermanentStorage", "Specific Impulse (S)");
@@ -320,12 +400,12 @@ int main() {
         break;
       }
       case 7: {
-        std::cout << "You will need to enter Acceleration (m/s/s), and Gravity (m/s)\n";
+        std::cout << "You will need to enter Acceleration (m/s/s), and Gravity (m/s/s)\n";
         std::cout << "Start with Acceleration (m/s/s): ";
         A = UpdatedCin("A PermanentStorage", "Acceleration (m/s/s)");
         std::cout << std::endl << std::endl;
         std::cout << "Now enter with Acceleration (m/s/s): ";
-        G = UpdatedCin("G PermanentStorage", "Gravity (m/s)");
+        G = UpdatedCin("G PermanentStorage", "Gravity (m/s/s)");
         std::cout << std::endl << std::endl;
         TWR = A / G;
         std::cout << "Your TWR is: " << TWR << ".\n";
@@ -335,12 +415,12 @@ int main() {
         break;
       }
       case 8: {
-        std::cout << "You will need to enter Average Exhaust Velocity (m/s), and Standard of Gravity (m/s)\n";
+        std::cout << "You will need to enter Average Exhaust Velocity (m/s), and Standard of Gravity (m/s/s)\n";
         std::cout << "Start with Average Exhaust Velocity (m/s)\n";
         AEV = UpdatedCin("AEV PermanentStorage", "Average Exhaust Velocity (m/s)");
         std::cout << std::endl << std::endl;
-        std::cout << "Now enter Gravity (m/s): ";
-        G0 = UpdatedCin("G PermanentStorage", "Gravity (m/s)");
+        std::cout << "Now enter Gravity (m/s/s): ";
+        G0 = UpdatedCin("G PermanentStorage", "Gravity (m/s/s)");
         std::cout << std::endl << std::endl;
         ISP = AEV / G0;
         std::cout << "The ISP of the engine is: " << ISP << " seconds.\n";
@@ -489,8 +569,10 @@ int main() {
           std::cout << "I have quite a few thoughts about where I will take ROCKET-X, but before I continue, I would like to warn you that there is great chance that ROCKET-X never becomes anything greater than what it is now, I have plans, but no guarantees that I will be working on ROCKET-X much longer than I have already.\n";
           std::cout << "With that out of the way, here are some of the possible things which could get developped!\n";
           std::cout << "1) A ∆v budgeting area\n";
-          std::cout << "2) A staging workspace\n";
-          std::cout << "3) More complex forumlas\n";
+          std::cout << "2) A improved staging workspace\n";
+          std::cout << "3) More complex forumlas and air resistance\n";
+					std::cout << "4) Launch window plotter\n";
+					std::cout << "5) Orbit tracker/Burn time calculator\n";
           std::cout << "If you have any more ideas of things to add, contact me at nathan.berglas@gmail.com!\n";
           break;
         }
@@ -508,18 +590,25 @@ int main() {
         break;
       }
       case 13: {
+        NotgoToMainMenu = false;
+        break;
+      }
+      case 14: {
         std::cout << "\033[2J\033[0;0H";
         std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
         return 0;
       }
       }
-      std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
-      std::cin >> choice;
-      if (choice == 2) {
-        std::cout << "\033[2J\033[0;0H";
-        std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
-        return 0;
+      if (NotgoToMainMenu) {
+        std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
+        std::cin >> choice;
+        if (choice == 2) {
+          std::cout << "\033[2J\033[0;0H";
+          std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+          return 0;
+        }
       }
+      NotgoToMainMenu = true;
     } else if (choice == 2) {
       std::cout << "\nYou have opted to use stage view. To begin, please choose an option.\n";
       std::cout << "1) Create Stages\n";
@@ -527,65 +616,101 @@ int main() {
       std::cout << "3) Create rockets\n";
       std::cout << "4) View rockets created\n";
       std::cout << "5) View budgeting menu\n";
-      std::cout << "6) Exit\n";
+      std::cout << "6) Exit back to main menu\n";
+      std::cout << "7) Exit ROCKET-X\n";
       std::cin >> choice;
 
       switch (choice) {
       case 1: {
-        while (repeatStage) {
-          repeatStage = false;
-          std::cout << "\033[2J\033[0;0H";
-          std::cout << "You have opted to create a new stage. The stages will be stored in files, so they save permantly (unless deleted).\n";
-          std::cout << "All stages have a name Ex. Eagle. They will also have a code, Ex. 1234. \n\nPlease enter in the name of the stage you want to create.\n";
-          std::cin >> stringChoice;
-          std::cout << "Now please enter a stage number. (No decimals)\n";
+        std::cout << "\033[2J\033[0;0H";
+        std::cout << "You have opted to create a new stage. The stages will be stored in files, so they save permantly (unless deleted).\n";
+        std::cout << "All stages have a name Ex. Eagle. They will also have a code, Ex. 1234. \n\nPlease enter in the name of the stage you want to create.\n";
+        std::cin >> stringChoice;
+        std::cout << "Now please enter a stage code. (Integer value only 6 digits maximum)\n";
+        std::cin >> choice;
+        choiceBackup = choice;
+        auto choiceS = std::to_string(choice);
+        std::ifstream myfile(stringChoice + choiceS + ".txt");
+        if (myfile.is_open()) {
+          std::cout << "WARNING, you already have a stage called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
           std::cin >> choice;
-					choiceBackup = choice;
-          auto choiceS = std::to_string(choice);
-          std::ifstream myfile(stringChoice + choiceS + ".txt");
-          if (myfile.is_open()) {
-            std::cout << "WARNING, you already have a stage called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
-            std::cin >> choice;
-            if (!choice) {
-              break;
-            }
-          }
-
-          Stage stageObject;
-          stageVector.push_back(stageObject);
-          std::cout << "Stage has been succesfully created! To finalize it, and save it permanely (unless deleted), you must enter in the following values in order.\n";
-
-          std::cout << "Wet mass (t): ";
-          std::cin >> floatChoice[0];
-          std::cout << "\nDry mass (t): ";
-          std::cin >> floatChoice[1];
-          std::cout << "\nSpecific impulse (s): ";
-          std::cin >> floatChoice[2];
-          std::cout << "\nThrust (KN): ";
-          std::cin >> floatChoice[3];
-          std::cout << "\nCurrent Gravity: ";
-          std::cin >> floatChoice[4];
-
-          stageObject.set_values(floatChoice[0], floatChoice[1], floatChoice[2], floatChoice[3], floatChoice[4]);
-          stageObject.create_File(stringChoice, choiceBackup);
-          std::cout << "Congradulations! Your stage: " << stageObject.StageName << " was created succesfully! With the code: " << stageObject.stageNumber << std::endl;
-          std::cout << "\n\n Would you like to make another stage? 1: Yes, 0: No\n";
-          std::cin >> choice;
-          if (choice) {
-            repeatStage = true;
+          if (!choice) {
+            break;
+          } else {
+            auto choiceBackupS = std::to_string(choiceBackup);
+            erase_line(stringChoice + choiceBackupS.c_str() + ".txt");
+            stageVector.erase(stageVector.end());
           }
         }
-        break;
-      }
-      case 2: {
+        Stage stageObject;
+        stageObject.StageName = stringChoice;
+        stageObject.stageNumber = choiceBackup;
+
+        std::cout << "Wet mass (t): \n";
+				floatChoice[0] = UpdatedCin("M0 PermanentStorage", "Wet mass (t)");
+				RecordInfo(floatChoice[0], "M0 PermanentStorage");
+        std::cout << "\nDry mass (t): ";
+        floatChoice[1] = UpdatedCin("MF PermanentStorage", "Dry mass (t)");
+				RecordInfo(floatChoice[1], "MF PermanentStorage");
+        std::cout << "\nSpecific impulse (s): ";
+        floatChoice[2] = UpdatedCin("ISP PermanentStorage", "Specific Impulse (s)");
+				RecordInfo(floatChoice[2], "ISP PermanentStorage");
+        std::cout << "\nThrust (KN): ";
+        floatChoice[3] = UpdatedCin("T PermanentStorage", "Thrust  (KN)");
+				RecordInfo(floatChoice[3], "T PermanentStorage");
+        std::cout << "\nCurrent Gravity: ";
+        floatChoice[4] = UpdatedCin("G PermanentStorage", "Current gravity (m/s/s)");
+				RecordInfo(floatChoice[4], "G PermanentStorage");
+        stageObject.set_values(floatChoice[0], floatChoice[1], floatChoice[2], floatChoice[3], floatChoice[4]);
+
+        stageVector.push_back(stageObject);
+        stageObject.create_File(stringChoice, choiceBackup);
+
+        std::cout << "You have succesfully created the stage: " << stageObject.StageName << std::endl;
+				std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+				std::cin >> choice;
+				if (choice == 1) {
+						break;
+				} else {
 					std::cout << "\033[2J\033[0;0H";
-					std::cout << "Welcome to the stage viewing area. Here you can view all the stages you have made so far.\n";
-					for (int x = 0; x < stageVector.size()-1; x++) {
-						std::cout << x << ") " << stageVector.at(x).StageName << ".\n";
-					}
-					std::cin >> choice;
-        break;
+        	std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+					return 0;
+				}
+				
       }
+      break;
+
+      case 2: {
+        std::cout << "Here are all the stages you have create so far, and their values: \n";
+        for (int i = 0; i < stageVector.size(); i++) {
+          std::cout << i + 1 << ") ";
+          std::cout << stageVector[i].StageName << ", ";
+          std::cout << stageVector[i].stageNumber << std::endl;
+        }
+				std::cout << "wHat action would you like to take?\n";
+				std::cout << "1) Delete a stage\n";
+				std::cout << "2) View a stage\n";
+				std::cout << "3) Edit a stage\n";
+        std::cin >> choice;
+
+        if (choice == 1) {
+          std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
+          std::cin >> choice;
+          if (choice < stageVector.size() + 1 && choice > 0) {
+            stageVector[choice - 1].remove_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber);
+            auto codeS = std::to_string(stageVector[choice - 1].stageNumber);
+            erase_line((stageVector[choice - 1].StageName + codeS + ".txt").c_str());
+            stageVector.erase(stageVector.begin() + choice - 1);
+          } else {
+            std::cout << "Removing the stage failed, please input a correct value.\n";
+          }
+        } else if (choice == 2) {
+					//View stage
+				} else if (choice == 3) {
+					//Edit stage
+				}
+      }
+
       case 3: {
 
         break;
@@ -599,13 +724,35 @@ int main() {
         break;
       }
       case 6: {
-        std::cout << "\033[2J\033[0;0H";
-        std::cout << "You have not chosen either 1 or 2, so you have automaticly quit the program.\n";
-        std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n";
+        NotgoToMainMenu = false;
         break;
       }
+      case 7: {
+        std::cout << "\033[2J\033[0;0H";
+        std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+        return 0;
+        break;
       }
-    } else {
+      default: {
+        if (NotgoToMainMenu) {
+          std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
+          std::cin >> choice;
+          if (choice == 2) {
+            std::cout << "\033[2J\033[0;0H";
+            std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+            return 0;
+          }
+        }
+        NotgoToMainMenu = true;
+				break;
+      }
+      }		
+		} else if (choice == 3) {
+			std::cout << "\033[2J\033[0;0H";
+      std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n";
+      return 0;
+		} 
+		else {
       std::cout << "\033[2J\033[0;0H";
       std::cout << "You have not chosen either 1 or 2, so you have automaticly quit the program.\n";
       std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n";
@@ -617,14 +764,10 @@ int main() {
 /*
 TODO
 -Give sources for more details
--Improve remove function to take into account vector and storing filenames
--Improve creating files to account for overwriting
--(PROTOTYPED) Make the stages vector automaticly add all stages from past runs using filename permanent storage
--Make stage viewer work
 -Make rocket creater
 -Make rocket viewer
 -Add budgeting menu (distance this stage can travel)
-
+-Ability to edit stages
 
 IDEAS
 -For stages, there should be a rocket, and then you can choose premade stages you have made into the rocket, and order them around.
@@ -636,4 +779,6 @@ These will include details needed for the rocket and the stage alike.
 
 -Expand to a thid part where it calculates orbits, planet tracking, 
 launch window, everything to do with spacetravel!
+
+I have no idea how to do this, but elevate the program, to a visual kinda think with like openGL or some other graphics library
 */
