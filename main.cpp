@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 
 //Used to create stages
 class Stage
@@ -18,7 +19,7 @@ class Stage
 	std::string StageName;
 	//Functions
 	void set_values(double, double, double, double, double);
-	void create_File(std::string, int);
+	void create_File(std::string, int, bool);
 	void remove_File(std::string, int);
 };
 
@@ -37,14 +38,16 @@ void Stage::set_values(double M0, double MF, double ISP, double T, double G)
 }
 
 //Used to put the stage in dynamic permanent storage
-void Stage::create_File(std::string SN, int code)
+void Stage::create_File(std::string SN, int code, bool store)
 {
 	StageName = SN;
 	stageNumber = code;
 	auto codeS = std::to_string(code);
+	//creates file
 	std::ofstream outfile
 	{
 		StageName + codeS + ".txt" };
+	//writes values into text file
 	outfile << StageName << std::endl;
 	outfile << stageNumber << std::endl;
 	outfile << sF << std::endl;
@@ -56,11 +59,12 @@ void Stage::create_File(std::string SN, int code)
 	outfile << sDV << std::endl;
 	outfile << sT << std::endl;
 	outfile << sG << std::endl;
-
-	std::fstream fileNamePermanentStorage;
-	fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
-	fileNamePermanentStorage << StageName << stageNumber << ".txt\n";
-
+	//If editing, you don't want to add director again, so you need an if loop to check
+	if (store) {
+		std::fstream fileNamePermanentStorage;
+		fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
+		fileNamePermanentStorage << StageName << stageNumber << ".txt\n";
+	}
 }
 
 //This will delete stages for clean-up
@@ -73,15 +77,15 @@ void Stage::remove_File(std::string SN, int code)
 		puts("File successfully deleted");
 }
 
+//Used for creating rockets
 class Rocket
 {
 	public:
 		//Attributes
 		std::string rocketName;
 	int rocketNumber;
-	std::vector<Stage> stageList;
+	std::vector<Stage> stageList; //Each rocket includes a vector of stages comprising it's parts
 	//Functions
-	void returnValues(std::string, int);
 	void reCalculate();
 };
 
@@ -184,35 +188,43 @@ void erase_line(std::string fileName)
 
 int main()
 {
+	//Integer variables
 	int choice;
 	int choice2;
 	int choiceBackup;
 	int number_of_lines = 0;
 	int stageCount = 0;
 
+	//String variables
 	std::string stringChoice;
 	std::string line;
 
+ //Double and float variables
 	double doubeChoice;
 	float floatChoice[10];
 
+  //Bool varialbes
 	bool NotgoToMainMenu = true;
 	bool redoLoop = true;
 	bool boolChoice;
 	bool repeatStage = true;
 
+	//Vectors
 	std::vector<Stage> stageVector;
 	std::vector<Rocket> rocketVector;
 
+	//Opening permanent storage text files
 	std::fstream FileNames;
 	FileNames.open("FileName Permanent Storage.txt");
 
 	std::fstream RocketNames;
 	RocketNames.open("RocketName Permanent Storage.txt");
 
+	//Declaring objects for each class. These objects are then pushed back into the vector for storage
 	Rocket RocketObject;
 	Stage stageObject;
 
+	//Rocketry variables
 	double G0, G, F, FLLS, ISP, M0, MF, CW, AEV;	//G0 is standard gravity (9.80665 m/s/s), G is current gravity (m/s/s), F is fuel (l), FLLS is fuel lost (l/s), ISP is specific impulse (s), M0 is wet mass (t), MF is dry mass (t), CW is current weight (t), and AEV is average effective velocity (m/s) 
 	double MoF, M1LF, FLKGS, EEV, A, TWR, DV;	//Mof is Mass of Fuel (KG), M1LF is Mass of 1 liter of fuel (T), FLKGS is fuel lost (KG/S), EEV is effective exhaust velocity (M/S), A is acceleration (M/S/S), TWR is thrust to weight ratio, FLLS is fuel lost (L/s), and DV is delta V (M/S)
 	double FAAN, AP, PAN, T;	//FAAN is flow area at nozzle (m2), AP is ambient pressure (kPa), PAN is pressure at nozzle (kPa), and T is Thrust (KN), 
@@ -241,11 +253,14 @@ int main()
 		"PAN",
 		"T" };
 
+	//Stages and rockets are held in text files, but to acces them, you need another text file that holds the directorys
+	//This function reads through each line of that file, and the # of lines is equal to how many stages/rockets there are to read
 	while (std::getline(FileNames, line))
 	{
 		++number_of_lines;
 	}
 
+	//Goes through each stage in permanent storage, creates an object for them, and then pushes it back into a vector
 	FileNames.clear();
 	FileNames.seekg(0);
 	for (int k = 0; k < number_of_lines; k++)
@@ -291,6 +306,7 @@ int main()
 		stageVector.push_back(stageObject);
 	}
 
+	//Does the same thing, but for rockets not stages
 	RocketNames.clear();
 	RocketNames.seekg(0);
 
@@ -303,24 +319,34 @@ int main()
 	RocketNames.seekg(0);
 	for (int k = 0; k < number_of_lines; k++)
 	{
+		if (!RocketNames) {
+				RocketNames.open("RocketName Permanent Storage.txt");
+		}
 		GotoLine(RocketNames, k + 1);
 		std::getline(RocketNames, line);
 		std::ifstream RocketFiles;
+		RocketNames.close();
 		RocketFiles.open(line);
 		RocketNames.clear();
 		RocketNames.seekg(0);
+		if (!RocketFiles) {
+			std::cout << "There is no file!\n";
+			exit(1);	// terminate with error
+		}
 		std::getline(RocketFiles, line);
 		RocketObject.rocketName = line;
 		std::getline(RocketFiles, line);
-		//RocketObject.rocketNumber = stoi(line);
+		if (line != "") {
+			RocketObject.rocketNumber = stoi(line);
+		}
 		while (std::getline(RocketFiles, line))
 		{
-			//RocketObject.push_back(line);
+			RocketObject.stageList.push_back(stageVector[stoi(line)]);
 		}
-
 		rocketVector.push_back(RocketObject);
 	}
 
+	//This is the main loop for the whole program, this is used so that the user can run the program multiple times without closing and re-opening
 	while (true)
 	{
 		// To reset the choice to quit or go back to main menu
@@ -376,6 +402,7 @@ int main()
 							std::cout << "Now enter Dry Mass (t): ";
 							MF = UpdatedCin("MF PermanentStorage", " Dry Mass (t)");
 							std::cout << std::endl << std::endl;
+							//This is the math:
 							DV = G0 *ISP* log(M0 / MF);
 							std::cout << "Your Delta V is a total of: " << DV << "M/S.\n";
 							RecordInfo(G0, "G0 PermanentStorage");
@@ -396,6 +423,7 @@ int main()
 							std::cout << "Now enter Dry Mass (t): ";
 							MF = UpdatedCin("MF PermanentStorage", " Dry Mass (t)");
 							std::cout << std::endl << std::endl;
+							//This is the math:
 							DV = EEV* log(M0 / MF);
 							std::cout << "Your Delta V is a total of: " << DV << "M/S.\n";
 							RecordInfo(EEV, "EEV PermanentStorage");
@@ -416,6 +444,7 @@ int main()
 						std::cout << "Now enter Dry Mass (t): ";
 						MF = UpdatedCin("MF PermanentStorage", "Dry Mass (t)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						MoF = M0 - MF;
 						std::cout << "The total mass of your fuel is: " << MoF << " Tons.\n";
 						RecordInfo(M0, "M0 PermanentStorage");
@@ -433,6 +462,7 @@ int main()
 						std::cout << "Now enter Fuel (l): ";
 						F = UpdatedCin("F PermanentStorage", "Fuel (l)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						M1LF = MoF / F;
 						M1LF *= 1000;
 						std::cout << "The mass of your fuel per liter is: " << M1LF << " KG.\n";
@@ -451,6 +481,7 @@ int main()
 						std::cout << "Now enter Fuel Lost (L/S): ";
 						FLLS = UpdatedCin("FLLS PermanentStorage", "Fuel Lost (L/S)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						FLKGS = M1LF * FLLS;
 						std::cout << "The amount of fuel lost per second is: " << FLKGS << " KG.\n";
 						RecordInfo(M1LF, "M1LF PermanentStorage");
@@ -468,6 +499,7 @@ int main()
 						std::cout << "Now enter Fuel Lost (KG/s): ";
 						FLKGS = UpdatedCin("FLKGS PermanentStorage", "Fuel lost (KG/s)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						EEV = T / (FLKGS / 1000);
 						std::cout << "Your effective exhaust velocity is " << EEV << "M/S.\n";
 						RecordInfo(T, "T PermanentStorage");
@@ -485,6 +517,7 @@ int main()
 						std::cout << "Now enter Current Weight (t): ";
 						CW = UpdatedCin("CW PermanentStorage", "Current Weight (t)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						A = T / CW;
 						std::cout << "Your acceleration is: " << A << " m/s/s.\n";
 						RecordInfo(T, "T PermanentStorage");
@@ -502,6 +535,7 @@ int main()
 						std::cout << "Now enter with Acceleration (m/s/s): ";
 						G = UpdatedCin("G PermanentStorage", "Gravity (m/s/s)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						TWR = A / G;
 						std::cout << "Your TWR is: " << TWR << ".\n";
 						RecordInfo(A, "A PermanentStorage");
@@ -519,6 +553,7 @@ int main()
 						std::cout << "Now enter Gravity (m/s/s): ";
 						G0 = UpdatedCin("G PermanentStorage", "Gravity (m/s/s)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						ISP = AEV / G0;
 						std::cout << "The ISP of the engine is: " << ISP << " seconds.\n";
 						RecordInfo(AEV, "AEV PermanentStorage");
@@ -536,6 +571,7 @@ int main()
 						std::cout << "Now enter Mass of 1 liter of fuel (KG): ";
 						M1LF = UpdatedCin("M1LF PermanentStorage", "Mass of 1 liter of fuel (KG)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						FLLS = FLKGS / M1LF;
 						std::cout << "\n\nThe fuel lost per second is: " << FLLS << " L/s.\n";
 						RecordInfo(FLKGS, "FLKGS PermanentStorage");
@@ -562,6 +598,7 @@ int main()
 						std::cout << "Now enter Pressure at Nozzle (kPa): ";
 						PAN = UpdatedCin("PAN PermanentStorage", "Pressure at Nozzle (kPa)");
 						std::cout << std::endl << std::endl;
+						//This is the math:
 						T = FLKGS *AEV + FAAN *(PAN - AP);
 						std::cout << "The total thrust of your rocket is: " << T / 1000 << " KN.\n";
 						RecordInfo(AEV, "AEV PermanentStorage");
@@ -575,6 +612,7 @@ int main()
 
 				case 11:
 					{
+						//For looking thorugh each value stored in permanent storage
 						std::cout << "\nHere are all of the values you currently have in Permanent Storage:\n\n";
 						std::ifstream variablePermanentStorageIF;
 						for (int g = 0; g < 20; g++)
@@ -640,6 +678,7 @@ int main()
 
 				case 12:
 					{
+						//This is the info page. It doesn't do any math, but I thought it was a fun addition to have
 						std::cout << "\033[2J\033[0;0H";
 						std::cout << "Welcome to the info page!\n";
 						std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
@@ -687,7 +726,7 @@ int main()
 								}
 
 							case 3:
-								{
+								{ // I have yet to collect all the sources used. Most are from wikipedia, online threads, nasa pages, or stack overflow
 									break;
 								}
 
@@ -724,18 +763,21 @@ int main()
 
 				case 13:
 					{
+						//This makes sure that the user goes directly back to the main menu, when they would usually be asked first. 
 						NotgoToMainMenu = false;
 						break;
 					}
 
 				case 14:
 					{
+						//Quits the program
 						std::cout << "\033[2J\033[0;0H";
 						std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
 						return 0;
 					}
 			}
 
+			//Checks if the program needs to ask the user
 			if (NotgoToMainMenu)
 			{
 				std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
@@ -748,9 +790,10 @@ int main()
 				}
 			}
 
+			//Resets this value, so that the user would be asked next time unless once again told not to be.
 			NotgoToMainMenu = true;
 		}
-		else if (choice == 2)
+		else if (choice == 2) // This is the start of the second part of the program, things get very complicated around here.
 		{
 			std::cout << "\nYou have opted to use stage view. To begin, please choose an option.\n";
 			std::cout << "1) Create Stages\n";
@@ -775,6 +818,7 @@ int main()
 						choiceBackup = choice;
 						auto choiceS = std::to_string(choice);
 						std::ifstream myfile(stringChoice + choiceS + ".txt");
+						//Checks to make sure that the user is not overwriting a stage without realizing it. if the file is opne, that means that a file already exists when it shouldn't
 						if (myfile.is_open())
 						{
 							std::cout << "WARNING, you already have a stage called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
@@ -786,11 +830,11 @@ int main()
 							else
 							{
 								auto choiceBackupS = std::to_string(choiceBackup);
-								erase_line(stringChoice + choiceBackupS.c_str() + ".txt");
+								erase_line(stringChoice + choiceBackupS.c_str() + ".txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
 								stageVector.erase(stageVector.end());
 							}
 						}
-
+						//This is all the same as a regular stage creation
 						stageObject.StageName = stringChoice;
 						stageObject.stageNumber = choiceBackup;
 
@@ -812,7 +856,7 @@ int main()
 						stageObject.set_values(floatChoice[0], floatChoice[1], floatChoice[2], floatChoice[3], floatChoice[4]);
 
 						stageVector.push_back(stageObject);
-						stageObject.create_File(stringChoice, choiceBackup);
+						stageObject.create_File(stringChoice, choiceBackup, 1);
 
 						std::cout << "You have succesfully created the stage: " << stageObject.StageName << std::endl;
 						std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
@@ -834,7 +878,7 @@ int main()
 				case 2:
 					{
 						std::cout << "Here are all the stages you have create so far, and their values: \n";
-						for (int i = 0; i < stageVector.size(); i++)
+						for (int i = 0; i < stageVector.size(); i++) //Checks size of vector, then runs through each item
 						{
 							std::cout << i + 1 << ") ";
 							std::cout << stageVector[i].StageName << ", ";
@@ -853,7 +897,8 @@ int main()
 							std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
 							std::cin >> choice;
 							if (choice < stageVector.size() + 1 && choice > 0)
-							{
+							{ 
+								// This code both deletes the file, removes it from the vector, and removes directory from permanent storage
 								stageVector[choice - 1].remove_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber);
 								auto codeS = std::to_string(stageVector[choice - 1].stageNumber);
 								erase_line((stageVector[choice - 1].StageName + codeS + ".txt").c_str());
@@ -862,25 +907,114 @@ int main()
 							else
 							{
 								std::cout << "Removing the stage failed, please input a correct value.\n";
+								std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+								std::cin >> choice;
+								if (choice == 1)
+								{
+										break;
+								}
+								else
+								{
+										std::cout << "\033[2J\033[0;0H";
+										std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+										return 0;
+								}
 							}
 						}
 						else if (choice == 2)
 						{
-							//View stage
+							//Very simple, the program just runs over every value and cout's it
+							std::cout << "What stage would you like to view?\n";
+							std::cin >> choice;
+   						std::cout << std::fixed;
+   						 std::cout << std::setprecision(2);
+							if (choice > 0 && choice < stageVector.max_size()+1) {
+							std::cout << "Stage Name: ";
+        			std::cout << stageVector[choice-1].StageName << "\n";
+							std::cout << "Stage Number: ";
+        			std::cout << stageVector[choice-1].stageNumber << "\n";
+							std::cout << "Fuel Amount (t): ";
+        			std::cout << stageVector[choice-1].sF << "\n";
+							std::cout << "Specific Impulse (s): ";
+        			std::cout << stageVector[choice-1].sISP << "\n";
+							std::cout << "Wet Mass (t): ";
+        			std::cout << stageVector[choice-1].sM0 << "\n";
+							std::cout << "Dry Mass (t): ";
+        			std::cout << stageVector[choice-1].sMF << "\n";
+							std::cout << "Acceleration (m/s/s): ";
+        			std::cout << stageVector[choice-1].sA << "\n";
+							std::cout << "Thrust to weight ratio: ";
+        			std::cout << stageVector[choice-1].sTWR << "\n";
+							std::cout << "Delta V (m/s): ";
+        			std::cout << stageVector[choice-1].sDV << "\n";
+							std::cout << "Thrust: ";
+        			std::cout << stageVector[choice-1].sT << "\n";
+							std::cout << "Current Gravity: ";
+        			std::cout << stageVector[choice-1].sG << "\n";
+							std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+							std::cin >> choice;
+							if (choice == 1)
+							{
+								break;
+							}
+							else
+							{
+								std::cout << "\033[2J\033[0;0H";
+								std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+								return 0;
+							}
+							} else {
+								std::cout << "You did not input a viable value\n";
+								std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+								std::cin >> choice;
+								if (choice == 1)
+								{
+									break;
+								}
+								else
+								{
+									std::cout << "\033[2J\033[0;0H";
+									std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+									return 0;
+								}
+							break;
 						}
+					 }
 						else if (choice == 3)
 						{
-							//Edit stage
+							std::cout << "What stage would you like to edit?\n";
+							std::cin >> choice;
+							std::cout << "Put in the new values for the stage:\n";
+							std::cout << "Wet mass (t): \n";
+							floatChoice[0] = UpdatedCin("M0 PermanentStorage", "Wet mass (t)");
+							RecordInfo(floatChoice[0], "M0 PermanentStorage");
+							std::cout << "\nDry mass (t): ";
+							floatChoice[1] = UpdatedCin("MF PermanentStorage", "Dry mass (t)");
+							RecordInfo(floatChoice[1], "MF PermanentStorage");
+							std::cout << "\nSpecific impulse (s): ";
+							floatChoice[2] = UpdatedCin("ISP PermanentStorage", "Specific Impulse (s)");
+							RecordInfo(floatChoice[2], "ISP PermanentStorage");
+							std::cout << "\nThrust (KN): ";
+							floatChoice[3] = UpdatedCin("T PermanentStorage", "Thrust  (KN)");
+							RecordInfo(floatChoice[3], "T PermanentStorage");
+							std::cout << "\nCurrent Gravity: ";
+							floatChoice[4] = UpdatedCin("G PermanentStorage", "Current gravity (m/s/s)");
+							RecordInfo(floatChoice[4], "G PermanentStorage");
+							stageVector[choice-1].set_values(floatChoice[0], floatChoice[1], floatChoice[2], floatChoice[3], floatChoice[4]); //This re-sets the values for the vector
+							stageVector[choice-1].remove_File(stageVector[choice-1].StageName, stageVector[choice-1].stageNumber); // This removes the old file, so there isn't two files
+							stageVector[choice-1].create_File(stageVector[choice-1].StageName, stageVector[choice-1].stageNumber, 0); // Creates a new file with new values
+							//The program doesn't have to worry about 2 directorys in permanent storage, since that was taken care of in the create_file function
 						} 
 						else if (choice == 4) 
 						{
-							//Do nothing I guess idk
+							//Do nothing I guess idk. I feel like I maybe should, but idc really
 						}
 						break;
-					}
+				 }
 
 				case 3:
 					{
+						//Rockets in theory are very similar to stages, but they do differ. Most of the code here is the same as in the stage segment.
 						std::cout << "You have decided to create a rocket! Rockets are collections of stages that are assembled together in an order.\n";
 						std::cout << "All the stages are then re-calculated with their stacking order in mind, and you will have the full understanding of a rocket\n";
 						std::cout << "The first step is to name your rocket. What name would you like to give?\n";
@@ -892,7 +1026,7 @@ int main()
 						{
 							stringChoice + codeS + ".txt" };
 						outfile << stringChoice << std::endl;
-						outfile << codeS << std::endl;
+						outfile << choice << std::endl;
 						std::cout << "And now for the fun part, please choose your stages in order from bottom to top.\n";
 						std::cout << "Here is a list of all of your stages:\n";
 						for (int i = 0; i < stageVector.size(); i++)
@@ -907,7 +1041,8 @@ int main()
 							std::cin >> choice2;
 							if (choice2 < stageVector.size() + 1 && choice2 != 0)
 							{
-								outfile << stageVector[choice2 - 1].StageName << stageVector[choice2 - 1].stageNumber << ".txt" << std::endl;
+								//outfile << stageVector[choice2 - 1].StageName << stageVector[choice2 - 1].stageNumber << ".txt" << std::endl;
+								outfile << choice2 - 1;
 								RocketObject.stageList.push_back(stageVector[choice2 - 1]);
 								std::cout << "Adding the stage succeded!, please input another value to add another stage. Enter 0 to stop.\n";
 								stageCount++;
@@ -918,13 +1053,13 @@ int main()
 							}
 						} while (choice2);
 						rocketVector.push_back(RocketObject);
-						std::fstream fileNamePermanentStorage;
-						fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
-						fileNamePermanentStorage << RocketObject.rocketName << RocketObject.rocketNumber << ".txt\n";
-
+						std::fstream rocketNamePermanentStorage;
+						rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
+						rocketNamePermanentStorage << RocketObject.rocketName << RocketObject.rocketNumber << ".txt\n";
+						rocketNamePermanentStorage.close();
 						std::cout << "Your rocket has succesfully been created!\n";
-						std::cout << "Name: " << std::endl;
-						std::cout << "Code: " << std::endl;
+						std::cout << "Name: " << RocketObject.rocketName << std::endl;
+						std::cout << "Code: " << RocketObject.rocketNumber << std::endl;
 						std::cout << "Stages in Order: " << std::endl;
 						std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
 						std::cin >> choice;
@@ -1007,7 +1142,6 @@ TODO Long term
 -Make rocket creater
 -Make rocket viewer
 -Add budgeting menu (distance this stage can travel)
--Ability to edit stages
 
 TODO short term
 -Make rocket permanenet storage work
