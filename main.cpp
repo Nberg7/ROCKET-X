@@ -45,6 +45,7 @@ void Stage::create_File(std::string SN, int code, bool store) {
     StageName + codeS + ".txt"
   };
   //writes values into text file
+	outfile << std::fixed; //To disallow scientific notation, which the program can't read
   outfile << StageName << std::endl;
   outfile << stageNumber << std::endl;
   outfile << sF << std::endl;
@@ -87,7 +88,7 @@ class Rocket {
 
 void Rocket::remove_File_Rocket(std::string SN, int code) {
   auto codeS = std::to_string(code);
-  if (remove((SN + codeS + ".txt").c_str()) != 0)
+  if (remove((SN + codeS + "R.txt").c_str()) != 0)
     perror("Error deleting file");
   else
     puts("File successfully deleted");
@@ -192,6 +193,13 @@ void erase_line_rocket(std::string fileName) {
 }
 
 int main() {
+	
+	//Used for outputting 2 decimal points EX. 2.00 not
+	std::cout << std::setprecision(2);
+
+	//Used to prevent scientific notation from being used
+	std::cout << std::fixed;
+
   //Integer variables
   int choice;
   int choice2;
@@ -269,6 +277,7 @@ int main() {
   FileNames.clear();
   FileNames.seekg(0);
   for (int k = 0; k < number_of_lines; k++) {
+		//std::getline(std::setprecision(2));
     GotoLine(FileNames, k + 1);
     std::getline(FileNames, line);
     std::ifstream StageFiles;
@@ -300,12 +309,12 @@ int main() {
     // sDV
     std::getline(StageFiles, line);
     stageObject.sDV = stoi(line);
-    // sG
-    std::getline(StageFiles, line);
-    stageObject.sG = stoi(line);
     // sT
     std::getline(StageFiles, line);
     stageObject.sT = stoi(line);
+		// sG
+    std::getline(StageFiles, line);
+    stageObject.sG = stoi(line);
 
     stageVector.push_back(stageObject);
   }
@@ -955,7 +964,7 @@ int main() {
         RocketObject.rocketNumber = choice;
         auto codeS = std::to_string(choice);
         std::ofstream outfile {
-          stringChoice + codeS + ".txt"
+          stringChoice + codeS + "R.txt"
         };
         outfile << stringChoice << std::endl;
         outfile << choice << std::endl;
@@ -983,13 +992,13 @@ int main() {
         rocketVector.push_back(RocketObject);
         std::fstream rocketNamePermanentStorage;
         rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
-        rocketNamePermanentStorage << RocketObject.rocketName << RocketObject.rocketNumber << ".txt\n";
+        rocketNamePermanentStorage << RocketObject.rocketName << RocketObject.rocketNumber << "R.txt\n";
         rocketNamePermanentStorage.close();
         std::cout << "Your rocket has succesfully been created!\n";
         std::cout << "Name: " << RocketObject.rocketName << std::endl;
         std::cout << "Code: " << RocketObject.rocketNumber << std::endl;
         std::cout << "Stages in Order: \n";
-        for (int p = 0; p < RocketObject.stageList.size() - 1; p++) {
+        for (int p = 0; p < rocketVector.back().stageList.size() - 1; p++) {
           std::cout << rocketVector.back().stageList[p].StageName << ", " << rocketVector.back().stageList[p].stageNumber << "\n";
         }
         std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
@@ -1109,17 +1118,21 @@ Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
 
+Issues:
+-Stages don't have correct values
+	This is becasue the program somehow doesn't read the decimal precision
+-Deleting stages that rockets use
+-When deleting rockets, rocket names arn't being taken out of rocketNamePermanentStorage
+
 TODO Long term
 -Give sources for more details
--Make rocket creater
--Make rocket viewer
 -Add budgeting menu (distance this stage can travel)
 
 TODO short term
--Make rocket permanenet storage work (done, but also kinda not idk)
--make a rocket viewer
 -Fix stages so that they have the correct and accurate values
--make rocket showing names number and other stuff work (I don't know what I was thinking when I wrote this, so I don't know if it's done)
+-Make rocket editor
+-Make rocket overwriting
+-Make rocket viewing and re-calculating
 
 IDEAS
 -For stages, there should be a rocket, and then you can choose premade stages you have made into the rocket, and order them around.
