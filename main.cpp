@@ -45,7 +45,7 @@ void Stage::create_File(std::string SN, int code, bool store) {
     StageName + codeS + ".txt"
   };
   //writes values into text file
-	outfile << std::fixed; //To disallow scientific notation, which the program can't read
+  outfile << std::fixed; //To disallow scientific notation, which the program can't read
   outfile << StageName << std::endl;
   outfile << stageNumber << std::endl;
   outfile << sF << std::endl;
@@ -61,7 +61,7 @@ void Stage::create_File(std::string SN, int code, bool store) {
   if (store) {
     std::fstream fileNamePermanentStorage;
     fileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
-    fileNamePermanentStorage << StageName << stageNumber << ".txt\n";
+    fileNamePermanentStorage << "\n" << StageName << stageNumber << ".txt";
   }
 }
 
@@ -70,8 +70,8 @@ void Stage::remove_File(std::string SN, int code) {
   auto codeS = std::to_string(code);
   if (remove((SN + codeS + ".txt").c_str()) != 0)
     perror("Error deleting file");
-  else
-    puts("File successfully deleted");
+  //else
+  //puts("File successfully deleted");
 }
 
 //Used for creating rockets
@@ -80,10 +80,11 @@ class Rocket {
     //Attributes
     std::string rocketName;
   int rocketNumber;
+  std::vector < double > additionMass; //Additional mass that is included inbetween each stage
   std::vector < Stage > stageList; //Each rocket includes a vector of stages comprising it's parts
   //Functions
   //void reCalculate(); // Have yet to implement
-	void remove_File_Rocket(std::string, int);
+  void remove_File_Rocket(std::string, int);
 };
 
 void Rocket::remove_File_Rocket(std::string SN, int code) {
@@ -184,21 +185,21 @@ void erase_line_rocket(std::string fileName) {
         outFile << line << "\n";
       }
     }
-		remove("RocketName Permanent Storage.txt");
-  	rename("output.txt", "RocketName Permanent Storage.txt");
+    remove("RocketName Permanent Storage.txt");
+    rename("output.txt", "RocketName Permanent Storage.txt");
   } else {
     std::cout << "File could not be read" << std::endl;
-		exit(1); // terminate with error
+    exit(1); // terminate with error
   }
 }
 
 int main() {
-	
-	//Used for outputting 2 decimal points EX. 2.00 not
-	std::cout << std::setprecision(2);
 
-	//Used to prevent scientific notation from being used
-	std::cout << std::fixed;
+  //Used for outputting 2 decimal points EX. 2.00 not
+  std::cout << std::setprecision(2);
+
+  //Used to prevent scientific notation from being used
+  std::cout << std::fixed;
 
   //Integer variables
   int choice;
@@ -277,7 +278,7 @@ int main() {
   FileNames.clear();
   FileNames.seekg(0);
   for (int k = 0; k < number_of_lines; k++) {
-		//std::getline(std::setprecision(2));
+    //std::getline(std::setprecision(2));
     GotoLine(FileNames, k + 1);
     std::getline(FileNames, line);
     std::ifstream StageFiles;
@@ -287,34 +288,34 @@ int main() {
     std::getline(StageFiles, line);
     stageObject.StageName = line;
     std::getline(StageFiles, line);
-    stageObject.stageNumber = stoi(line);
+    stageObject.stageNumber = stod(line);
     // sF
     std::getline(StageFiles, line);
-    stageObject.sF = stoi(line);
+    stageObject.sF = atof(line.c_str());
     // sIsp
     std::getline(StageFiles, line);
-    stageObject.sISP = stoi(line);
+    stageObject.sISP = atof(line.c_str());
     // sM0
     std::getline(StageFiles, line);
-    stageObject.sM0 = stoi(line);
+    stageObject.sM0 = atof(line.c_str());
     // sMF
     std::getline(StageFiles, line);
-    stageObject.sMF = stoi(line);
+    stageObject.sMF = atof(line.c_str());
     // sA
     std::getline(StageFiles, line);
-    stageObject.sA = stoi(line);
+    stageObject.sA = atof(line.c_str());
     // sTWR
     std::getline(StageFiles, line);
-    stageObject.sTWR = stoi(line);
+    stageObject.sTWR = atof(line.c_str());
     // sDV
     std::getline(StageFiles, line);
-    stageObject.sDV = stoi(line);
+    stageObject.sDV = atof(line.c_str());
     // sT
     std::getline(StageFiles, line);
-    stageObject.sT = stoi(line);
-		// sG
+    stageObject.sT = atof(line.c_str());
+    // sG
     std::getline(StageFiles, line);
-    stageObject.sG = stoi(line);
+    stageObject.sG = atof(line.c_str());
 
     stageVector.push_back(stageObject);
   }
@@ -344,11 +345,11 @@ int main() {
     std::getline(RocketFiles, line);
     RocketObject.rocketName = line;
     std::getline(RocketFiles, line);
-    RocketObject.rocketNumber = stoi(line);
+    RocketObject.rocketNumber = atof(line.c_str());;
     stageCount = 0;
     RocketObject.stageList.clear();
     while (std::getline(RocketFiles, line)) {
-      RocketObject.stageList.push_back(stageVector[stoi(line)]);
+      RocketObject.stageList.push_back(stageVector[atof(line.c_str())]);
       stageCount++;
     }
     rocketVector.push_back(RocketObject);
@@ -357,7 +358,8 @@ int main() {
   number_of_lines = 0;
 
   //This is the main loop for the whole program, this is used so that the user can run the program multiple times without closing and re-opening
-  while (true) {
+  //Mainmenu label is for goto satement on line 866 to break out of a multi nested loop
+  MAINMENU: while (true) {
     // To reset the choice to quit or go back to main menu
     NotgoToMainMenu = true;
     std::cout << "\033[2J\033[0;0H";
@@ -785,7 +787,7 @@ int main() {
         choiceBackup = choice;
         auto choiceS = std::to_string(choice);
         std::ifstream myfile(stringChoice + choiceS + ".txt");
-        //Checks to make sure that the user is not overwriting a stage without realizing it. if the file is opne, that means that a file already exists when it shouldn't
+        //Checks to make sure that the user is not overwriting a stage without realizing it. if the file is open, that means that a file already exists when it shouldn't
         if (myfile.is_open()) {
           std::cout << "WARNING, you already have a stage called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
           std::cin >> choice;
@@ -820,7 +822,7 @@ int main() {
 
         stageVector.push_back(stageObject);
         stageObject.create_File(stringChoice, choiceBackup, 1);
-
+        myfile.close();
         std::cout << "You have succesfully created the stage: " << stageObject.StageName << std::endl;
         std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
         std::cin >> choice;
@@ -854,6 +856,22 @@ int main() {
         if (choice == 1) {
           std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
           std::cin >> choice;
+          for (int l = 0; l < rocketVector.size(); l++) {
+            for (int g = 0; g < rocketVector[l].stageList.size(); g++) {
+              if (rocketVector[l].stageList[g].StageName == stageVector[choice - 1].StageName && rocketVector[l].stageList[g].stageNumber == stageVector[choice - 1].stageNumber) {
+                std::cout << "This stage is currently being used in a rocket. You  must first remove this stage from the rocket to continue.\n";
+                std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+                std::cin >> choice;
+                if (choice == 1) {
+                  goto MAINMENU;
+                } else {
+                  std::cout << "\033[2J\033[0;0H";
+                  std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+                  return 0;
+                }
+              }
+            }
+          }
           if (choice < stageVector.size() + 1 && choice > 0) {
             // This code both deletes the file, removes it from the vector, and removes directory from permanent storage
             stageVector[choice - 1].remove_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber);
@@ -962,6 +980,20 @@ int main() {
         std::cout << "Every rocket has a rocket code, please enter yours now. (Integer values only)\n";
         std::cin >> choice;
         RocketObject.rocketNumber = choice;
+        auto choiceS2 = std::to_string(choice);
+        std::ifstream myfile(stringChoice + choiceS2 + "R.txt");
+        //Checks to make sure that the user is not overwriting a rocket without realizing it. if the file is open, that means that a file already exists when it shouldn't
+        if (myfile.is_open()) {
+          std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
+          std::cin >> choice2;
+          if (!choice2) {
+            break;
+          } else {
+            auto choiceBackupS = std::to_string(choice);
+            erase_line_rocket(stringChoice + choiceBackupS.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
+            //rocketVector.erase(rocketVector.end());
+          }
+        }
         auto codeS = std::to_string(choice);
         std::ofstream outfile {
           stringChoice + codeS + "R.txt"
@@ -980,7 +1012,6 @@ int main() {
         do {
           std::cin >> choice2;
           if (choice2 < stageVector.size() + 1 && choice2 != 0) {
-            //outfile << stageVector[choice2 - 1].StageName << stageVector[choice2 - 1].stageNumber << ".txt" << std::endl;
             outfile << choice2 - 1 << std::endl;
             RocketObject.stageList.push_back(stageVector[choice2 - 1]);
             std::cout << "Adding the stage succeded!, please input another value to add another stage. Enter 0 to stop.\n";
@@ -992,15 +1023,16 @@ int main() {
         rocketVector.push_back(RocketObject);
         std::fstream rocketNamePermanentStorage;
         rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
-        rocketNamePermanentStorage << RocketObject.rocketName << RocketObject.rocketNumber << "R.txt\n";
+        rocketNamePermanentStorage << "\n" << RocketObject.rocketName << RocketObject.rocketNumber << "R.txt";
         rocketNamePermanentStorage.close();
         std::cout << "Your rocket has succesfully been created!\n";
         std::cout << "Name: " << RocketObject.rocketName << std::endl;
         std::cout << "Code: " << RocketObject.rocketNumber << std::endl;
         std::cout << "Stages in Order: \n";
-        for (int p = 0; p < rocketVector.back().stageList.size() - 1; p++) {
+        for (int p = 0; p <= rocketVector.back().stageList.size(); p++) {
           std::cout << rocketVector.back().stageList[p].StageName << ", " << rocketVector.back().stageList[p].stageNumber << "\n";
         }
+        myfile.close();
         std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
         std::cin >> choice;
         if (choice == 1) {
@@ -1035,14 +1067,14 @@ int main() {
         std::cout << "4) Take no action\n";
         std::cin >> choice;
         if (choice == 1) {
-					//Delete the rocket (Same as stage, code for code but stage is replaced with rocket)
-					std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
+          //Delete the rocket (Same as stage, code for code but stage is replaced with rocket)
+          std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
           std::cin >> choice;
           if (choice < rocketVector.size() + 1 && choice > 0) {
             // This code both deletes the file, removes it from the vector, and removes directory from permanent storage
             rocketVector[choice - 1].remove_File_Rocket(rocketVector[choice - 1].rocketName, rocketVector[choice - 1].rocketNumber);
             auto codeS = std::to_string(rocketVector[choice - 1].rocketNumber);
-            erase_line_rocket((rocketVector[choice - 1].rocketName + codeS + ".txt").c_str());
+            erase_line_rocket((rocketVector[choice - 1].rocketName + codeS + "R.txt").c_str());
             rocketVector.erase(rocketVector.begin() + choice - 1);
           } else {
             std::cout << "Removing the rocket has failed, please input a correct value.\n";
@@ -1056,17 +1088,14 @@ int main() {
               return 0;
             }
           }
-				}
-				else if (choice == 2) {
-					//View a rocket (Should be easish)
-				}
-				else if (choice == 3) {
-						//Edit a rocket (Hell on earth)
-				}
-				else if (choice == 4) {
-						//Take no action (already doing that)
-				}
-				break;
+        } else if (choice == 2) {
+          //View a rocket (Should be really hard cause I gotta make caculations using the entirety of the rocket)
+        } else if (choice == 3) {
+          //Edit a rocket (Hell on earth)
+        } else if (choice == 4) {
+          //Take no action (already doing that)
+        }
+        break;
       }
 
       case 5: {
@@ -1117,22 +1146,34 @@ int main() {
 Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
+-For next week: Correct the issues, then move on and make a good system for calcultion
+	You will need to add all the stages weights together and add to the dry and wet masses
+	Then calculate, and re-calculate. Once that is done, put it all in the view rockets area
+-For next week: Edit rockets! THis includes moving stages, removing stages, adding stages, 
+renaming the rocket, perhaps renaming the stages! 
+-Once editing rockets are done, and calculating	 rockets are done, ROCKET-X will be almost complete!
+-Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu
+
 
 Issues:
--Stages don't have correct values
-	This is becasue the program somehow doesn't read the decimal precision
--Deleting stages that rockets use
--When deleting rockets, rocket names arn't being taken out of rocketNamePermanentStorage
+-Overwriting rockets doesn't remove old stages
+-Possibly dangerous whitespace appearing in PermanentStorage.
+-General issues with rocket pre-viewing
+-Overwriting stages and rockets just generally are flawed and need fixing
+
+-Displaying stages is incorrect after creating a rocket
+	Didn't display the final one
+	Displayed extra stages
+	I don't know why this is happening, but to fix it, I probobly need to check out the for loops
 
 TODO Long term
 -Give sources for more details
 -Add budgeting menu (distance this stage can travel)
 
 TODO short term
--Fix stages so that they have the correct and accurate values
 -Make rocket editor
--Make rocket overwriting
 -Make rocket viewing and re-calculating
+-Rename a stage
 
 IDEAS
 -For stages, there should be a rocket, and then you can choose premade stages you have made into the rocket, and order them around.
@@ -1141,6 +1182,8 @@ Then you can go to the stage editor and then create a new rocket, and put all of
 You will need to be able to remove stages, move stages around, delete and create rockets, replace stages, and delete and create new stages
 All of this will be stored in files that will be created and destroyed. There will be a file for each rocket, and each stage. 
 These will include details needed for the rocket and the stage alike. 
+
+have an option to add additional weight inbetween stages.
 
 -Expand to a thid part where it calculates orbits, planet tracking, 
 launch window, everything to do with spacetravel!
