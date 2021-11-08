@@ -30,7 +30,7 @@ void Stage::set_values(double M0, double MF, double ISP, double T, double G) {
   sMF = MF;
   sA = T / MF;
   sTWR = sA / G;
-  sDV = 9.80665 * ISP * log(M0 / MF);;
+  sDV = 9.80665 * ISP * log(M0 / MF);
   sT = T;
   sG = G;
 }
@@ -70,22 +70,39 @@ void Stage::remove_File(std::string SN, int code) {
   auto codeS = std::to_string(code);
   if (remove((SN + codeS + ".txt").c_str()) != 0)
     perror("Error deleting file");
-  //else
-  //puts("File successfully deleted");
 }
 
 //Used for creating rockets
 class Rocket {
   public:
-    //Attributes
+  //Attributes
     std::string rocketName;
-  int rocketNumber;
-  std::vector < double > additionMass; //Additional mass that is included inbetween each stage
-  std::vector < Stage > stageList; //Each rocket includes a vector of stages comprising it's parts
+  	int rocketNumber;
+ 		std::vector < double > additionalMass; //Additional mass that is included inbetween each stage
+  	std::vector < Stage > stageList; //Each rocket includes a vector of stages comprising it's parts
+		double RocketStats[6]; //Stats in order are  M0, MF, A, DV, T, TWR
   //Functions
-  //void reCalculate(); // Have yet to implement
+	void Calculate(); // NOT DONE
   void remove_File_Rocket(std::string, int);
+	void reset();
 };
+
+void Rocket::Calculate() {
+	// M0
+	for (int m = 0; m <= stageList.size(); m++) {
+		RocketStats[0] += stageList[m].sM0; //Adds each stages mass up
+	}
+	//MF
+	RocketStats[1] = RocketStats[0] - stageList.front().sF; //Takes all of the mass in the rocket, then subtracts fuel of the bottom stage
+	//A
+	RocketStats[2] = stageList.front().sT / RocketStats[0]; //Takes the thrust of the bottom stage and divides by total weight
+	//DV
+	RocketStats[3] = 9.80665 * stageList.front().sISP * log(RocketStats[1] / RocketStats[1]); //Uses the rocket for Tsiolkovsky rocket equation
+	//T
+	RocketStats[4] = stageList.front().sT;
+	//TWR
+	RocketStats[5] = RocketStats[2] / 9.80665; //Takes rockets acceleration  and divides by gravity
+}
 
 void Rocket::remove_File_Rocket(std::string SN, int code) {
   auto codeS = std::to_string(code);
@@ -93,6 +110,14 @@ void Rocket::remove_File_Rocket(std::string SN, int code) {
     perror("Error deleting file");
   else
     puts("File successfully deleted");
+}
+
+//This is used to reset RocketObject each time a new rocket is created so the old rocket doesn't overlap
+void Rocket::reset() {
+	rocketName = "";
+	int rocketNumber = 0;
+	additionalMass.clear();
+	stageList.clear();
 }
 
 //Used for stages, this can read a specific line in a file (NOT MADE BY ME)
@@ -354,6 +379,7 @@ int main() {
     }
     rocketVector.push_back(RocketObject);
     RocketFiles.close();
+		rocketVector.back().Calculate();
   }
   number_of_lines = 0;
 
@@ -753,7 +779,7 @@ int main() {
 
       //Checks if the program needs to ask the user
       if (NotgoToMainMenu) {
-        std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
+        std::cout << "Would you like to run this program again? 1: Yes, 2: No\n";
         std::cin >> choice;
         if (choice == 2) {
           std::cout << "\033[2J\033[0;0H";
@@ -971,6 +997,7 @@ int main() {
       }
 
       case 3: {
+				RocketObject.reset();
         //Rockets in theory are very similar to stages, but they do differ. Most of the code here is the same as in the stage segment.
         std::cout << "You have decided to create a rocket! Rockets are collections of stages that are assembled together in an order.\n";
         std::cout << "All the stages are then re-calculated with their stacking order in mind, and you will have the full understanding of a rocket\n";
@@ -991,7 +1018,6 @@ int main() {
           } else {
             auto choiceBackupS = std::to_string(choice);
             erase_line_rocket(stringChoice + choiceBackupS.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
-            //rocketVector.erase(rocketVector.end());
           }
         }
         auto codeS = std::to_string(choice);
@@ -1042,7 +1068,6 @@ int main() {
           std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
           return 0;
         }
-
         break;
       }
 
@@ -1088,8 +1113,85 @@ int main() {
               return 0;
             }
           }
-        } else if (choice == 2) {
-          //View a rocket (Should be really hard cause I gotta make caculations using the entirety of the rocket)
+        } else if (choice == 2) { 
+          std::cout << "You have chosen to view a rocket. Which rocket would you like to view?\n";
+					 for (int s = 0; s < rocketVector.size(); s++) {
+           	std::cout << s + 1 << ") " << rocketVector[s].rocketName << rocketVector[s].rocketNumber << " (";
+           	for (int v = 0; v < rocketVector[s].stageList.size(); v++) {
+             	std::cout << rocketVector[s].stageList[v].StageName << rocketVector[s].stageList[v].stageNumber;
+            	 if (v + 1 < rocketVector[s].stageList.size()) // Makes sure that it isn't the last time runnig the loop 
+             	{
+            	   std::cout << ", ";
+            	 }
+           	}
+          	 std::cout << ")\n";
+         	}
+				std::cin >> choice;
+				std::cout << "\n\nYou have opted to view the rocket " << rocketVector[choice-1].rocketName << " " << rocketVector[choice-1].rocketNumber << ".\n";
+				std::cout << "";
+
+
+				//You have chosen to view a rocket. Which rocket would you like to view?
+				//1) Saturn 5 (SIC1, SII1, SIVB1)
+				//2) Saturn 6 (SIC1, SIC1, SII1, SII1, SIVB1, SIVB1)
+				//3) Saturn 7 (SIC1, SII1, SII1, SIVB1)
+				//1
+				//
+				//
+				//You have opted to view the rocket Saturn 5.
+				//Rocket Name: Saturn
+				//Rocket Number: 5
+				//Stages in order: (SIC1, SII1, SIVB1)
+				//Rocket Statistics:
+				//Wet Mass:
+				//Dry Mass:
+				//Acceleration:
+				//∆V:
+				//Thrust:
+				//Thrust to weight ratio:
+
+				//Stage Indepth View:
+				//(1) SIC1
+				//Fuel:
+				//Specific impulse:
+				//Wet mass:
+				//Dry mass:
+				//Acceleration: 
+				//Thrust to weight ratio:
+				//∆V:
+				//Thrust:
+				//Current gravity:
+				//
+				//(2)
+				//(3)
+				//
+				//What action would you like to take? (Editing, re-organizing, and removing stages can all be done in the editing menu, not here)
+				//(1) View rocket once in flight (Once the lower stage(s) have been discarded)
+				//(3) Export rocket as a text file
+				//(4) Go to main menu
+				//(5) Exit Rocket-X 
+				//1
+				//What stage would you like to be the current firing stage?
+				//(1) SIC1
+				//(2) SII1
+				//(3) SIVB1
+				//2
+				//You have now calculated for these stages (in order): SII1, SIVB1.
+				//Rocket Number: 5
+				//Stages in order: (SIC1, SII1, SIVB1)
+				//Rocket Statistics:
+				//Wet Mass:
+				//Dry Mass:
+				//Acceleration:
+				//∆V:
+				//Thrust:
+				//Thrust to weight ratio:
+				//
+				//Would you like to run this program again? 1: Yes, 2: No
+				//2
+				//Thank you for using ROCKET-X, Goodbye!
+
+
         } else if (choice == 3) {
           //Edit a rocket (Hell on earth)
         } else if (choice == 4) {
@@ -1116,7 +1218,7 @@ int main() {
 
       default: {
         if (NotgoToMainMenu) {
-          std::cout << "Would you like to run this program again? 1: Yes, 2: No:\n";
+          std::cout << "Would you like to run this program again? 1: Yes, 2: No\n";
           std::cin >> choice;
           if (choice == 2) {
             std::cout << "\033[2J\033[0;0H";
@@ -1154,17 +1256,12 @@ renaming the rocket, perhaps renaming the stages!
 -Once editing rockets are done, and calculating	 rockets are done, ROCKET-X will be almost complete!
 -Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu
 
-
 Issues:
--Overwriting rockets doesn't remove old stages
--Possibly dangerous whitespace appearing in PermanentStorage.
--General issues with rocket pre-viewing
 -Overwriting stages and rockets just generally are flawed and need fixing
-
--Displaying stages is incorrect after creating a rocket
-	Didn't display the final one
-	Displayed extra stages
-	I don't know why this is happening, but to fix it, I probobly need to check out the for loops
+-There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
+brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
+bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
+-Fix DV calculation
 
 TODO Long term
 -Give sources for more details
@@ -1182,11 +1279,30 @@ Then you can go to the stage editor and then create a new rocket, and put all of
 You will need to be able to remove stages, move stages around, delete and create rockets, replace stages, and delete and create new stages
 All of this will be stored in files that will be created and destroyed. There will be a file for each rocket, and each stage. 
 These will include details needed for the rocket and the stage alike. 
+-It is calculated at runtime, not stored in the text file (for simplicity)
 
-have an option to add additional weight inbetween stages.
+-Have an option to add additional weight inbetween stages.
+
+-For rocket calculations, the rocket needs to know the values for all these variables, for every stage. This does not mean
+the specific stage isolated, but included, so stage 1 would be the full rocket, and stage 2 would be the full rocket without stage 1
+and stage 3 would be the full rocket without stages 1 and 2...
+-The variables I want to have calculated: 
+    M0 (Wet mass)
+    MF (Dry mass)
+    A (Acceleration)
+    TWR (Thrust to weight ratio)
+    DV (Delta V)
+    T (Thrust)
+This could be stored in a array, where it retains the same order. This array is part of the rocket class and is
+updated with the Calculate() function. The most recent values of this are then writen to the rocket permanenet storage
+
+-You could make an option and it creates a human-readable text file that they can download which details the rocket and stages
+
+-I could have an advanced view where you see every single variable calculated even dumb ones like M1LF
 
 -Expand to a thid part where it calculates orbits, planet tracking, 
 launch window, everything to do with spacetravel!
 
-I have no idea how to do this, but elevate the program, to a visual kinda think with like openGL or some other graphics library
+-I have no idea how to do this, but elevate the program, to a visual kinda think with like openGL or some other graphics library
+
 */
