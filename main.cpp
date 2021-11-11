@@ -86,22 +86,32 @@ class Rocket {
   void Calculate();
   void remove_File_Rocket(std::string, int);
   void reset();
+	//Constructor
+	Rocket();
 };
 
+Rocket::Rocket() {} //I don't at all need this, but I got it here for some reason just in case
+
 void Rocket::Calculate() {
+	RocketStats[0] = 0;
+	RocketStats[1] = 0;
+	RocketStats[2] = 0;
+	RocketStats[3] = 0;
+	RocketStats[4] = 0;
+	RocketStats[5] = 0;
   // M0
-  for (int m = 0; m <= stageList.size(); m++) {
+  for (int m = 0; m < stageList.size(); m++) {
     RocketStats[0] += stageList[m].sM0; //Adds each stages wet mass up
     RocketStats[0] += additionalMass[m];
   }
   //MF
-  for (int m = 0; m <= stageList.size(); m++) {
+  for (int m = 0; m < stageList.size(); m++) {
     RocketStats[1] += stageList[m].sMF; //Adds each stages dry mass up
     RocketStats[1] += additionalMass[m];
   }
   //A
-  for (int m = 0; m <= stageList.size(); m++) {
-    RocketStats[2] += stageList[m].sT / stageList[m].sM0; //Takes the thrust of the bottom stage and divides by total weight
+  for (int m = 0; m < stageList.size(); m++) {
+    RocketStats[2] += stageList[m].sT / RocketStats[0]; //Takes the thrust of the bottom stage and divides by total weight
   }
   //DV
   RocketStats[3] = 0;
@@ -110,12 +120,14 @@ void Rocket::Calculate() {
     dryMassAbove = 0;
     for (int k = g; k < stageList.size(); k++) { //Adds up weight above it
       wetMassAbove += stageList[k].sM0;
+			wetMassAbove += additionalMass[k];
       dryMassAbove += stageList[k].sMF;
+			dryMassAbove += additionalMass[k];
     }
     RocketStats[3] += 9.80665 * stageList.front().sISP * log(wetMassAbove / dryMassAbove); //Uses the rocket for Tsiolkovsky rocket equation
   }
   //T
-  for (int m = 0; m <= stageList.size(); m++) {
+  for (int m = 0; m < stageList.size(); m++) {
     RocketStats[4] += stageList[m].sT;
   }
   //TWR
@@ -224,7 +236,7 @@ void erase_line_rocket(std::string fileName) {
   if (inFile) {
     while (getline(inFile, line, '\n')) {
       //if the line read is not same as string searched for then write it into the output.txt file
-      if (line != stringtobeSearched) {
+      if (line != stringtobeSearched && line != "" && line != "\n") {
         outFile << line << "\n";
       }
     }
@@ -397,6 +409,7 @@ int main() {
     rocketVector.push_back(RocketObject);
     RocketFiles.close();
     rocketVector.back().Calculate();
+		RocketObject.reset();
   }
   number_of_lines = 0;
 
@@ -1076,9 +1089,10 @@ int main() {
         std::cout << "Name: " << RocketObject.rocketName << std::endl;
         std::cout << "Code: " << RocketObject.rocketNumber << std::endl;
         std::cout << "Stages in Order: \n";
-        for (int p = 0; p <= rocketVector.back().stageList.size(); p++) {
+        for (int p = 0; p < rocketVector.back().stageList.size(); p++) {
           std::cout << rocketVector.back().stageList[p].StageName << ", " << rocketVector.back().stageList[p].stageNumber << "\n";
         }
+				rocketVector.back().Calculate();
         myfile.close();
         std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
         std::cin >> choice;
@@ -1140,6 +1154,7 @@ int main() {
             std::cout << s + 1 << ") " << rocketVector[s].rocketName << rocketVector[s].rocketNumber << " (";
             for (int v = 0; v < rocketVector[s].stageList.size(); v++) {
               std::cout << rocketVector[s].stageList[v].StageName << rocketVector[s].stageList[v].stageNumber;
+							rocketVector[s].Calculate();
               if (v + 1 < rocketVector[s].stageList.size()) // Makes sure that it isn't the last time runnig the loop 
               {
                 std::cout << ", ";
@@ -1160,6 +1175,7 @@ int main() {
               return 0;
             }
           }
+					std::cout << "\033[2J\033[0;0H";
           std::cout << "\n\nYou have opted to view the rocket " << rocketVector[choice - 1].rocketName << " " << rocketVector[choice - 1].rocketNumber;
           std::cout << "\nRocket Name: " << rocketVector[choice - 1].rocketName;
           std::cout << "\nRocket Number: " << rocketVector[choice - 1].rocketNumber;
@@ -1171,6 +1187,7 @@ int main() {
               std::cout << rocketVector[choice - 1].stageList[b].StageName << rocketVector[choice - 1].stageList[b].stageNumber << ")\n";
             }
           }
+					rocketVector[choice-1].Calculate(); //I am calculating many times, but this is just to make complete sure for redundancys sake
           std::cout << "\n~~~ Rocket Statistics (For the entire rocket combined) ~~~~ ";
           std::cout << "\nWet Mass: " << rocketVector[choice - 1].RocketStats[0] << " Tonnes";
           std::cout << "\nDry Mass: " << rocketVector[choice - 1].RocketStats[1] << " Tonnes";
@@ -1179,17 +1196,43 @@ int main() {
           std::cout << "\nThrust: " << rocketVector[choice - 1].RocketStats[4] << " KN";
           //std::cout << "\nThrust to weight ratio: " << rocketVector[choice - 1].RocketStats[5]; //Not usefull for a rocket combined
 
-          std::cout << "\n\n~~~ Stage Indepth View ~~~\n";
+          std::cout << "\n\n~~~ Stage Indepth View (Individual) ~~~\n";
+					for (int r = 0; r < rocketVector[choice-1].stageList.size(); r++) {
+						std::cout << r+1 << ") " << rocketVector[choice-1].stageList[r].StageName << rocketVector[choice-1].stageList[r].stageNumber << std::endl;
+						std::cout << "Fuel (t): " << rocketVector[choice-1].stageList[r].sF << std::endl;
+						std::cout << "Specific Impulse (s): " << rocketVector[choice-1].stageList[r].sISP << std::endl;
+						std::cout << "Wet mass (t): " << rocketVector[choice-1].stageList[r].sM0 << std::endl;
+						std::cout << "Dry mass (t): " << rocketVector[choice-1].stageList[r].sMF << std::endl;
+						std::cout << "Acceleration: " << rocketVector[choice-1].stageList[r].sA << std::endl;
+						std::cout << "DV (m/s): " << rocketVector[choice-1].stageList[r].sDV << std::endl;
+						std::cout << "Thrust (KN): " << rocketVector[choice-1].stageList[r].sT << std::endl;
+						std::cout << "Current gravity (m/s): " << rocketVector[choice-1].stageList[r].sG << std::endl << std::endl;
+					}
 
-          std::cout << "\n\nWould you like return to the main menu (1), or quit the program (2)?\n";
-          std::cin >> choice;
-          if (choice == 1) {
-            break;
-          } else {
-            std::cout << "\033[2J\033[0;0H";
-            std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
-            return 0;
-          }
+					std::cout << "What action would you like to take?\n";
+					std::cout << "1) View rocket once in flight (Once the lower stage(s) have been discarded)\n";
+          std::cout << "2) Export rocket as a text file\n";
+          std::cout << "3) Go to main menu\n";
+          std::cout << "4) Exit Rocket-X\n";
+					std::cin >> choice2;
+					switch (choice2) {
+						case 1: {
+
+							break;
+						}
+						case 2: {
+
+							break;
+						}
+						case 3: {
+							break;
+						}
+						case 4: {
+							std::cout << "\033[2J\033[0;0H";
+            	std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+							return 0;
+						}
+					}
           //You have chosen to view a rocket. Which rocket would you like to view?
           //1) Saturn 5 (SIC1, SII1, SIVB1)
           //2) Saturn 6 (SIC1, SIC1, SII1, SII1, SIVB1, SIVB1)
@@ -1306,18 +1349,19 @@ int main() {
 Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
--For next week: Correct the issues, edit rockets! THis includes moving stages, removing stages, adding stages, 
+-The only things left are the view individual stage branch, the budgeting branch, and the editing branch
+-For next week: Correct the issues, finish rocket viewing, then finnaly edit rockets! This includes moving stages, removing stages, adding stages, 
 renaming the rocket, perhaps renaming the stages! 
 -Once editing rockets are done, and calculating	 rockets are done, ROCKET-X will be almost complete!
--Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu
+-Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu and other similarly large ideas
+-Rocketname storage and storage is finicky. Make sure that there is a newline at the end, and really don't un-format it by hand, otherwise, it works
 
 Issues:
 -Overwriting stages and rockets just generally are flawed and need fixing
 -There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
 brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
--MAKE EXTRA WEIGHT WORK !! (This is important for DV calculations for the rocket)
--Deleting rockets creates a whitespace in rocket name permanent storage which causes seg fault
+-Some DV calculations are off, so try to find a good source that you can cross refernece from
 
 TODO Long term
 -Give sources for more details
@@ -1326,6 +1370,8 @@ TODO Long term
 TODO short term
 -Make rocket editor
 -Rename a stage
+-Continue on rocket viewing
+-Fix issues
 
 IDEAS
 -For stages, there should be a rocket, and then you can choose premade stages you have made into the rocket, and order them around.
@@ -1335,8 +1381,6 @@ You will need to be able to remove stages, move stages around, delete and create
 All of this will be stored in files that will be created and destroyed. There will be a file for each rocket, and each stage. 
 These will include details needed for the rocket and the stage alike. 
 -It is calculated at runtime, not stored in the text file (for simplicity)
-
--Have an option to add additional weight inbetween stages.
 
 -For rocket calculations, the rocket needs to know the values for all these variables, for every stage. This does not mean
 the specific stage isolated, but included, so stage 1 would be the full rocket, and stage 2 would be the full rocket without stage 1
