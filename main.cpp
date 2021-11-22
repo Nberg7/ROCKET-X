@@ -118,13 +118,13 @@ void Rocket::Calculate() {
   for (int g = 0; g < stageList.size(); g++) { //For each stage
     wetMassAbove = 0;
     dryMassAbove = 0;
-    for (int k = g; k < stageList.size(); k++) { //Adds up weight above it
-      wetMassAbove += stageList[k].sM0;
-			wetMassAbove += additionalMass[k];
-      dryMassAbove += stageList[k].sMF;
-			dryMassAbove += additionalMass[k];
+    for (int k = g; k+1 < stageList.size(); k++) { //Adds up weight above it
+      wetMassAbove += stageList[k+1].sM0;
+			wetMassAbove += additionalMass[k+1];
     }
-    RocketStats[3] += 9.80665 * stageList.front().sISP * log(wetMassAbove / dryMassAbove); //Uses the rocket for Tsiolkovsky rocket equation
+		dryMassAbove = wetMassAbove + stageList[g].sMF;
+		wetMassAbove += stageList[g].sM0;
+    RocketStats[3] += 9.80665 * stageList[g].sISP * log(wetMassAbove / dryMassAbove); //Uses the rocket for Tsiolkovsky rocket equation
   }
   //T
   for (int m = 0; m < stageList.size(); m++) {
@@ -1217,6 +1217,12 @@ int main() {
 					std::cin >> choice2;
 					switch (choice2) {
 						case 1: {
+							std::cout << "What stage would you like to be the current firing stage?\n";
+							for (int b = 0; b < rocketVector[choice - 1].stageList.size(); b++) {
+             		std::cout << "(" << b+1 << ") ";
+								std::cout << rocketVector[choice - 1].stageList[b].StageName << rocketVector[choice - 1].stageList[b].stageNumber << "\n";
+          		}
+							std::cin >> choice;
 
 							break;
 						}
@@ -1233,46 +1239,6 @@ int main() {
 							return 0;
 						}
 					}
-          //You have chosen to view a rocket. Which rocket would you like to view?
-          //1) Saturn 5 (SIC1, SII1, SIVB1)
-          //2) Saturn 6 (SIC1, SIC1, SII1, SII1, SIVB1, SIVB1)
-          //3) Saturn 7 (SIC1, SII1, SII1, SIVB1)
-          //1
-          //
-          //
-          //You have opted to view the rocket Saturn 5.
-          //Rocket Name: Saturn
-          //Rocket Number: 5
-          //Stages in order: (SIC1, SII1, SIVB1)
-          //Rocket Statistics:
-          //Wet Mass:
-          //Dry Mass:
-          //Acceleration:
-          //∆V:
-          //Thrust:
-          //Thrust to weight ratio:
-
-          //Stage Indepth View:
-          //(1) SIC1
-          //Fuel:
-          //Specific impulse:
-          //Wet mass:
-          //Dry mass:
-          //Acceleration: 
-          //Thrust to weight ratio:
-          //∆V:
-          //Thrust:
-          //Current gravity:
-          //
-          //(2)
-          //(3)
-          //
-          //What action would you like to take? (Editing, re-organizing, and removing stages can all be done in the editing menu, not here)
-          //(1) View rocket once in flight (Once the lower stage(s) have been discarded)
-          //(3) Export rocket as a text file
-          //(4) Go to main menu
-          //(5) Exit Rocket-X 
-          //1
           //What stage would you like to be the current firing stage?
           //(1) SIC1
           //(2) SII1
@@ -1349,7 +1315,7 @@ int main() {
 Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
--The only things left are the view individual stage branch, the budgeting branch, and the editing branch
+-The only things left are the view stage branch, the budgeting branch, and the editing branch
 -For next week: Correct the issues, finish rocket viewing, then finnaly edit rockets! This includes moving stages, removing stages, adding stages, 
 renaming the rocket, perhaps renaming the stages! 
 -Once editing rockets are done, and calculating	 rockets are done, ROCKET-X will be almost complete!
@@ -1361,7 +1327,6 @@ Issues:
 -There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
 brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
--Some DV calculations are off, so try to find a good source that you can cross refernece from
 
 TODO Long term
 -Give sources for more details
