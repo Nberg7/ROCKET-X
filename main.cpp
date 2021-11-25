@@ -78,7 +78,6 @@ class Rocket {
     //Attributes
     std::string rocketName;
   int rocketNumber;
-  std::vector < double > additionalMass; //Additional mass that is included inbetween each stage
   std::vector < Stage > stageList; //Each rocket includes a vector of stages comprising it's parts
   double RocketStats[6]; //Stats in order are  M0, MF, A, DV, T, TWR
   double wetMassAbove, dryMassAbove; //Same as RocketStats[0] and [1], but it can be changed
@@ -103,12 +102,10 @@ void Rocket::Calculate() {
   // M0
   for (int m = 0; m < stageList.size(); m++) {
     RocketStats[0] += stageList[m].sM0; //Adds each stages wet mass up
-    RocketStats[0] += additionalMass[m];
   }
   //MF
   for (int m = 0; m < stageList.size(); m++) {
     RocketStats[1] += stageList[m].sMF; //Adds each stages dry mass up
-    RocketStats[1] += additionalMass[m];
   }
   //A
   for (int m = 0; m < stageList.size(); m++) {
@@ -121,7 +118,6 @@ void Rocket::Calculate() {
     dryMassAbove = 0;
     for (int k = g; k + 1 < stageList.size(); k++) { //Adds up weight above it
       wetMassAbove += stageList[k + 1].sM0;
-      wetMassAbove += additionalMass[k + 1];
     }
     dryMassAbove = wetMassAbove + stageList[g].sMF;
     wetMassAbove += stageList[g].sM0;
@@ -143,36 +139,23 @@ void Rocket::CalculateSeperated(int RocketIndex) {
   RocketStats[4] = 0;
   RocketStats[5] = 0;
   // M0
-  for (int m = 0; m < stageList.size() - RocketIndex; m++) {
-    RocketStats[0] += stageList[m + (RocketIndex - 1)].sM0; //Adds each stages wet mass up
-    RocketStats[0] += additionalMass[m + (RocketIndex - 1)];
+  for (int m = 0; m < stageList.size() - (RocketIndex - 1); m++) {
+    RocketStats[0] += stageList[(RocketIndex + m)].sM0; //Adds each stages wet mass up
   }
   //MF
-  for (int m = 0; m < stageList.size() - RocketIndex; m++) {
-    RocketStats[1] += stageList[m + (RocketIndex - 1)].sMF; //Adds each stages dry mass up
-    RocketStats[1] += additionalMass[m + (RocketIndex - 1)];
-  }
+	RocketStats[1] = RocketStats[0] - stageList[RocketIndex].sM0; //Takes full mass of all the stages above
+	RocketStats[1] += stageList[RocketIndex].sMF; //Adds dry mass of firing stage
+
   //A
-  for (int m = 0; m < stageList.size() - RocketIndex; m++) {
-    RocketStats[2] += stageList[m + (RocketIndex - 1)].sT / RocketStats[0]; //Takes the thrust of the bottom stage and divides by total weight
-  }
+  RocketStats[2] += stageList[(RocketIndex)].sT / RocketStats[0]; //Takes the thrust of the bottom stage and divides by weight
+
   //DV
   RocketStats[3] = 0;
-  for (int g = 0; g < stageList.size() - RocketIndex; g++) { //For each stage
-    wetMassAbove = 0;
-    dryMassAbove = 0;
-    for (int k = g; k + 1 < stageList.size() - RocketIndex; k++) { //Adds up weight above it
-      wetMassAbove += stageList[k + 1].sM0;
-      wetMassAbove += additionalMass[k + 1];
-    }
-    dryMassAbove = wetMassAbove + stageList[g].sMF;
-    wetMassAbove += stageList[g].sM0;
-    RocketStats[3] += 9.80665 * stageList[g].sISP * log(wetMassAbove / dryMassAbove); //Uses the rocket for Tsiolkovsky rocket equation
-  }
+  RocketStats[3] += 9.80665 * stageList[RocketIndex].sISP * log( RocketStats[0] / RocketStats[1]); //Uses the rocket for Tsiolkovsky rocket equation
+  
   //T
-  for (int m = 0; m < stageList.size() - RocketIndex; m++) {
-    RocketStats[4] += stageList[m + (RocketIndex - 1)].sT;
-  }
+  RocketStats[4] += stageList[(RocketIndex)].sT; //Simply takes thrust of firing stage
+  
   //TWR
   RocketStats[5] = RocketStats[2] / 9.80665; //Takes rockets acceleration  and divides by gravity (Doesn't have to add each stage up because accleeration already does that)
 }
@@ -189,7 +172,6 @@ void Rocket::remove_File_Rocket(std::string SN, int code) {
 void Rocket::reset() {
   rocketName = "";
   int rocketNumber = 0;
-  additionalMass.clear();
   stageList.clear();
 }
 
@@ -446,8 +428,6 @@ int main() {
     RocketObject.stageList.clear();
     while (std::getline(RocketFiles, line)) {
       RocketObject.stageList.push_back(stageVector[atof(line.c_str())]);
-      std::getline(RocketFiles, line);
-      RocketObject.additionalMass.push_back(atof(line.c_str()));
     }
     rocketVector.push_back(RocketObject);
     RocketFiles.close();
@@ -786,16 +766,16 @@ int main() {
           std::cout << "7) Thrust to weight ratio: TWR = A / G\n";
           std::cout << "8) Specific Impulse: ISP = AEV / G0\n";
           std::cout << "9) Fuel lost in l/s: FLLS = FLKGS / M1LF\n";
-          std::cout << "10) Thrust: T = FLKGS *AEV + FAAN *(PAN - AP)\n";
-          std::cout << "\nThese are all of the equations used in this program. If you love math, you can try to do do them by hand and check your awnsers with the program.\n\n";
+          std::cout << "10) Thrust: T = FLKGS * AEV + FAAN * (PAN - AP)\n";
+          std::cout << "\nThese are all of the equations used in this program. If you love math, you can try to do do them by hand and check your answers with the program.\n\n";
           break;
         }
 
         case 2: {
           std::cout << "\033[2J\033[0;0H";
           std::cout << "What do the variable names mean? Here is a total list of all the variable names used and what they stand for: \n\n";
-          std::cout << "G0 is standard gravity (9.80665 m/s/s)\nG is current gravity (m/s/s)\nF is fuel (l)\nFLLS is fuel lost (l/s)\nISP is specific impulse (s)\nM0 is wet mass (t)\nMF is dry mass (t)\nCW is current weight (t)\nAEV is average effective velocity (m/s)";
-          std::cout << "\nMof is Mass of Fuel (KG)\nM1LF is Mass of 1 liter of fuel (T)\nFLKGS is fuel lost (KG/S)\nEEV is effective exhaust velocity (M/S)\nA is acceleration (M/S/S)\nTWR is thrust to weight ratio\nFLLS is fuel lost (L/s)\nDV is delta V (M/S)";
+          std::cout << "G0 is standard gravity (9.80665 m/s/s)\nG is current gravity (m/s/s)\nF is fuel (l)\nFLLS is fuel lost (l/s)\nISP is specific impulse (s)\nM0 is wet mass (t)\nMF is dry mass (t)\nCW is current weight (t)\nAEV is average exhaust velocity (m/s)";
+          std::cout << "\nMOF is Mass of Fuel (KG)\nM1LF is Mass of 1 liter of fuel (T)\nFLKGS is fuel lost (KG/S)\nEEV is effective exhaust velocity (M/S)\nA is acceleration (M/S/S)\nTWR is thrust to weight ratio\nFLLS is fuel lost (L/s)\nDV is delta V (M/S)";
           std::cout << "\nFAAN is flow area at nozzle (m2)\nAP is ambient pressure (kPa)\nPAN is pressure at nozzle (kPa)\nand T is Thrust (KN)\n\n";
           std::cout << "There are lots of variables in rocket science, so now you have a list to refer back to if confused.\n\n";
           std::cout << "Units:\nT: tons\nm/s/s is amount of meters traveled per second increased per second\nl is liters\nl/s is liters per second\ns is seconds\nm/s is meters traveled per second\nKG is kilograms\nm2 is meters squared\nkPa is kilopascals\nKG/S is kilograms per second\nAnd finnaly KN is kilonewton.\n";
@@ -1113,11 +1093,7 @@ int main() {
           if (choice2 < stageVector.size() + 1 && choice2 != 0) {
             outfile << choice2 - 1 << std::endl;
             RocketObject.stageList.push_back(stageVector[choice2 - 1]);
-            std::cout << "Adding the stage succeded!, now enter the additional mass inbetween this stage and the next (Not included in the mass of the stage).\n If this is the final stage you wish to add, then this will serve as the mass of the payload\n";
-            std::cin >> doubleChoice;
-            RocketObject.additionalMass.push_back(doubleChoice);
-            outfile << doubleChoice << std::endl;
-            std::cout << "Additional mass has been added. Please enter your next stage, or 0 to stop.\n";
+            std::cout << "Please enter your next stage, or 0 to stop.\n";
           } else if (choice2 != 0) {
             std::cout << "Adding the stage failed, please input a correct value.\n";
           }
@@ -1292,11 +1268,19 @@ int main() {
           	std::cout << "\n∆V: " << rocketVector[choice - 1].RocketStats[3] << " M/S";
          		std::cout << "\nThrust: " << rocketVector[choice - 1].RocketStats[4] << " KN";
          		std::cout << "\nThrust to weight ratio: " << rocketVector[choice - 1].RocketStats[5];
-            std::cin >> choice2;
+            std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+            std::cin >> choice;
+            if (choice == 1) {
+              break;
+            } else {
+              std::cout << "\033[2J\033[0;0H";
+              std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+              return 0;
+            }
 						break;
           }
           case 2: {
-
+						//Somehow, I need to export a rocket to a text file. I can maybe handle this
             break;
           }
           case 3: {
@@ -1317,6 +1301,7 @@ int main() {
       }
 
       case 5: {
+				//Budgeting menu
         break;
       }
 
@@ -1376,7 +1361,7 @@ Issues:
 -There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
 brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
--Fix calculating for each seperate stage. Calculate values by hand to cross reference to check.
+-Fix DV calculations for specific stage. (Is it the DV for the stage only or for the stage and above)
 
 TODO Long term
 -Give sources for more details
@@ -1396,6 +1381,11 @@ You will need to be able to remove stages, move stages around, delete and create
 All of this will be stored in files that will be created and destroyed. There will be a file for each rocket, and each stage. 
 These will include details needed for the rocket and the stage alike. 
 -It is calculated at runtime, not stored in the text file (for simplicity)
+
+-Payload feature. You create a payload and then choose the number of stages you want to use
+you can choose rocket engines, and other stuff like that, and then the program tells you, depending on the destination
+that you want to send yoru payload, how much dv you need, and how much fuel you need to achieve that dv
+The payload section could be very similar to the dv budgeting menu
 
 -For rocket calculations, the rocket needs to know the values for all these variables, for every stage. This does not mean
 the specific stage isolated, but included, so stage 1 would be the full rocket, and stage 2 would be the full rocket without stage 1
