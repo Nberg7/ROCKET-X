@@ -83,7 +83,7 @@ class Rocket {
   double wetMassAbove, dryMassAbove; //Same as RocketStats[0] and [1], but it can be changed
   //Functions
   void Calculate();
-	void CalculateSeperated(int);
+  void CalculateSeperated(int);
   void remove_File_Rocket(std::string, int);
   void reset();
   //Constructor
@@ -132,7 +132,7 @@ void Rocket::Calculate() {
 }
 
 void Rocket::CalculateSeperated(int RocketIndex) {
-	RocketStats[0] = 0;
+  RocketStats[0] = 0;
   RocketStats[1] = 0;
   RocketStats[2] = 0;
   RocketStats[3] = 0;
@@ -143,19 +143,19 @@ void Rocket::CalculateSeperated(int RocketIndex) {
     RocketStats[0] += stageList[(RocketIndex + m)].sM0; //Adds each stages wet mass up
   }
   //MF
-	RocketStats[1] = RocketStats[0] - stageList[RocketIndex].sM0; //Takes full mass of all the stages above
-	RocketStats[1] += stageList[RocketIndex].sMF; //Adds dry mass of firing stage
+  RocketStats[1] = RocketStats[0] - stageList[RocketIndex].sM0; //Takes full mass of all the stages above
+  RocketStats[1] += stageList[RocketIndex].sMF; //Adds dry mass of firing stage
 
   //A
   RocketStats[2] += stageList[(RocketIndex)].sT / RocketStats[0]; //Takes the thrust of the bottom stage and divides by weight
 
   //DV
   RocketStats[3] = 0;
-  RocketStats[3] += 9.80665 * stageList[RocketIndex].sISP * log( RocketStats[0] / RocketStats[1]); //Uses the rocket for Tsiolkovsky rocket equation
-  
+  RocketStats[3] += 9.80665 * stageList[RocketIndex].sISP * log(RocketStats[0] / RocketStats[1]); //Uses the rocket for Tsiolkovsky rocket equation
+
   //T
   RocketStats[4] += stageList[(RocketIndex)].sT; //Simply takes thrust of firing stage
-  
+
   //TWR
   RocketStats[5] = RocketStats[2] / 9.80665; //Takes rockets acceleration  and divides by gravity (Doesn't have to add each stage up because accleeration already does that)
 }
@@ -1245,30 +1245,30 @@ int main() {
             std::cout << "You are now calculating for these stages (in order): (";
             for (int b = 0; b < rocketVector[choice - 1].stageList.size() - (choice2 - 1); b++) {
               if (b + 1 < rocketVector[choice - 1].stageList.size() - (choice2 - 1)) { // Makes sure that it isn't the last time runnig the loop 
-                std::cout << rocketVector[choice-1].stageList[(choice2 + b)-1].StageName << rocketVector[choice-1].stageList[(choice2 + b)-1].stageNumber << ", ";
+                std::cout << rocketVector[choice - 1].stageList[(choice2 + b) - 1].StageName << rocketVector[choice - 1].stageList[(choice2 + b) - 1].stageNumber << ", ";
               } else {
-                std::cout << rocketVector[choice-1].stageList[(choice2 + b)-1].StageName << rocketVector[choice-1].stageList[(choice2 + b)-1].stageNumber << ")\n";
+                std::cout << rocketVector[choice - 1].stageList[(choice2 + b) - 1].StageName << rocketVector[choice - 1].stageList[(choice2 + b) - 1].stageNumber << ")\n";
               }
             }
             std::cout << "\nRocket Name: " << rocketVector[choice - 1].rocketName;
-       	  	std::cout << "\nRocket Number: " << rocketVector[choice - 1].rocketNumber;
-     		    std::cout << "\nStages In Order: (";
-     		    for (int b = 0; b < rocketVector[choice - 1].stageList.size() - (choice2 - 1); b++) {
+            std::cout << "\nRocket Number: " << rocketVector[choice - 1].rocketNumber;
+            std::cout << "\nStages In Order: (";
+            for (int b = 0; b < rocketVector[choice - 1].stageList.size() - (choice2 - 1); b++) {
               if (b + 1 < rocketVector[choice - 1].stageList.size() - (choice2 - 1)) { // Makes sure that it isn't the last time runnig the loop 
-                std::cout << rocketVector[choice-1].stageList[(choice2 + b)-1].StageName << rocketVector[choice-1].stageList[(choice2 + b)-1].stageNumber << ", ";
+                std::cout << rocketVector[choice - 1].stageList[(choice2 + b) - 1].StageName << rocketVector[choice - 1].stageList[(choice2 + b) - 1].stageNumber << ", ";
               } else {
-                std::cout << rocketVector[choice-1].stageList[(choice2 + b)-1].StageName << rocketVector[choice-1].stageList[(choice2 + b)-1].stageNumber << ")\n";
+                std::cout << rocketVector[choice - 1].stageList[(choice2 + b) - 1].StageName << rocketVector[choice - 1].stageList[(choice2 + b) - 1].stageNumber << ")\n";
               }
             }
-   		      rocketVector[choice - 1].CalculateSeperated(choice2-1); //So now I have to calculate with firing stage
-    		    std::cout << "\n~~~ Rocket Statistics (From stage " << rocketVector[choice-1].stageList[choice2-1].StageName << rocketVector[choice-1].stageList[choice2-1].stageNumber << ") ~~~~";
-      		  std::cout << "\nWet Mass: " << rocketVector[choice - 1].RocketStats[0] << " Tonnes";
-        		std::cout << "\nDry Mass: " << rocketVector[choice - 1].RocketStats[1] << " Tonnes";
-        		std::cout << "\nAcceleration: " << rocketVector[choice - 1].RocketStats[2] << " M/S/S";
-          	std::cout << "\n∆V: " << rocketVector[choice - 1].RocketStats[3] << " M/S";
-         		std::cout << "\nThrust: " << rocketVector[choice - 1].RocketStats[4] << " KN";
-         		std::cout << "\nThrust to weight ratio: " << rocketVector[choice - 1].RocketStats[5];
-            std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+            rocketVector[choice - 1].CalculateSeperated(choice2 - 1); //So now I have to calculate with firing stage
+            std::cout << "\n~~~ Rocket Statistics (From stage " << rocketVector[choice - 1].stageList[choice2 - 1].StageName << rocketVector[choice - 1].stageList[choice2 - 1].stageNumber << ") ~~~~";
+            std::cout << "\nWet Mass: " << rocketVector[choice - 1].RocketStats[0] << " Tonnes";
+            std::cout << "\nDry Mass: " << rocketVector[choice - 1].RocketStats[1] << " Tonnes";
+            std::cout << "\nAcceleration: " << rocketVector[choice - 1].RocketStats[2] << " M/S/S";
+            std::cout << "\n∆V: " << rocketVector[choice - 1].RocketStats[3] << " M/S";
+            std::cout << "\nThrust: " << rocketVector[choice - 1].RocketStats[4] << " KN";
+            std::cout << "\nThrust to weight ratio: " << rocketVector[choice - 1].RocketStats[5];
+            std::cout << "\nWould you like return to the main menu (1), or quit the program (2)?\n";
             std::cin >> choice;
             if (choice == 1) {
               break;
@@ -1277,10 +1277,60 @@ int main() {
               std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
               return 0;
             }
-						break;
+            break;
           }
           case 2: {
-						//Somehow, I need to export a rocket to a text file. I can maybe handle this
+            rocketVector[choice - 1].Calculate();
+            auto codeS = std::to_string(rocketVector[choice - 1].rocketNumber);
+            std::ofstream outfile;
+            outfile.open(rocketVector[choice - 1].rocketName + codeS + " EXPORT.txt");
+            outfile << "                ROCKET EXPORT SHEET - " << rocketVector[choice - 1].rocketName << " " << codeS << " ROCKET                \n"; // Centered bold big
+            outfile << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+            outfile << "\n                Details                \n"; // Centered bold
+            outfile << "Name: " << rocketVector[choice - 1].rocketName << " " << codeS << "\n";
+            outfile << "Total Wet mass: " << rocketVector[choice - 1].RocketStats[0] << " Tonnes\n";
+            outfile << "Total Dry mass: " << rocketVector[choice - 1].RocketStats[1] << " Tonnes\n";
+            outfile << "Total ∆V: " << rocketVector[choice - 1].RocketStats[3] << " Meters/Second/Second\n";
+            outfile << "Total Thrust: " << rocketVector[choice - 1].RocketStats[4] << " Kilonewtons\n";
+            outfile << "\n                Stages                \n"; // Centered bold
+            outfile << "Stage names: ";
+            outfile << rocketVector[choice - 1].stageList[0].StageName;
+            for (int q = 1; q < rocketVector[choice - 1].stageList.size(); q++) {
+              outfile << ", ";
+              outfile << rocketVector[choice - 1].stageList[q].StageName;
+            }
+            outfile << std::endl;
+            for (int u = 0; u < rocketVector[choice - 1].stageList.size(); u++) {
+              outfile << "\n" << rocketVector[choice - 1].stageList[u].StageName << " " << rocketVector[choice - 1].stageList[u].stageNumber << "\n"; // bold
+              outfile << "Wet mass: " << rocketVector[choice - 1].stageList[u].sM0 << " Tonnes\n";
+              outfile << "Dry mass: " << rocketVector[choice - 1].stageList[u].sMF << " Tonnes\n";
+              outfile << "Specific Impulse: " << rocketVector[choice - 1].stageList[u].sISP << " Seconds\n";
+              outfile << "∆V: " << rocketVector[choice - 1].stageList[u].sDV << "\n";
+              outfile << "Thrust: " << rocketVector[choice - 1].stageList[u].sT << " Kilonewtons\n";
+            }
+            outfile << "\n                In Flight                \n"; // Centered Bold
+            for (int x = 0; x < rocketVector[choice - 1].stageList.size(); x++) {
+              rocketVector[choice - 1].CalculateSeperated(x);
+              outfile << "\n" << rocketVector[choice - 1].stageList[x].StageName << " " << rocketVector[choice - 1].stageList[x].stageNumber << "\n"; // bold
+              outfile << "Wet mass: " << rocketVector[choice - 1].RocketStats[0] << " Tonnes\n";
+              outfile << "Dry mass: " << rocketVector[choice - 1].RocketStats[1] << " Tonnes\n";
+              outfile << "Specific Impulse: " << rocketVector[choice - 1].stageList[x].sISP << " Seconds\n";
+              outfile << "∆V: " << rocketVector[choice - 1].RocketStats[3] << "\n";
+              outfile << "Thrust: " << rocketVector[choice - 1].RocketStats[4] << " Kilonewtons\n";
+              outfile << "Acceleration: " << rocketVector[choice - 1].RocketStats[2] << " Meters/Second/Second\n";
+              outfile << "TWR: " << rocketVector[choice - 1].RocketStats[5] << "\n";
+            }
+            outfile.close();
+            std::cout << "You have chosen to export a rocket to a text file. ROCKET-X has a file ready for you to download, it is called: " << rocketVector[choice - 1].rocketName << codeS << " EXPORT.txt" << std::endl;
+            std::cout << "\nWould you like return to the main menu (1), or quit the program (2)?\n";
+            std::cin >> choice;
+            if (choice == 1) {
+              break;
+            } else {
+              std::cout << "\033[2J\033[0;0H";
+              std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+              return 0;
+            }
             break;
           }
           case 3: {
@@ -1291,7 +1341,7 @@ int main() {
             std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
             return 0;
           }
-        	}
+          }
         } else if (choice == 3) {
           //Edit a rocket (Hell on earth)
         } else if (choice == 4) {
@@ -1301,7 +1351,7 @@ int main() {
       }
 
       case 5: {
-				//Budgeting menu
+        //Budgeting menu
         break;
       }
 
@@ -1349,19 +1399,21 @@ int main() {
 Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
--The only things left are the view stage branch,  and the editing branch
--For next week: Correct the issues, finish rocket viewing, then finnaly edit rockets! This includes moving stages, removing stages, adding stages, 
+-The only things left is the editing branch!
+-For next week: Edit rockets (and fix issues too a little)! This includes moving stages, removing stages, adding stages, 
 renaming the rocket, perhaps renaming the stages! 
--Once editing rockets are done, and calculating	 rockets are done, ROCKET-X will be almost complete!
+-Once editing rockets are done, ROCKET-X Beta will be almost complete!
 -Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu and other similarly large ideas
 -Rocketname storage and storage is finicky. Make sure that there is a newline at the end, and really don't un-format it by hand, otherwise, it works
 
-Issues:
+Long term Issues:
 -Overwriting stages and rockets just generally are flawed and need fixing
 -There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
 brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
--Fix DV calculations for specific stage. (Is it the DV for the stage only or for the stage and above)
+
+Immediate Issues:
+
 
 TODO Long term
 -Give sources for more details
@@ -1370,7 +1422,6 @@ TODO Long term
 TODO short term
 -Make rocket editor
 -Rename a stage
--Continue on rocket viewing
 -Fix issues
 
 IDEAS
