@@ -929,7 +929,7 @@ int main() {
         std::cout << "1) Delete a stage\n";
         std::cout << "2) View a stage\n";
         std::cout << "3) Edit a stage\n";
-        std::cout << "4) Take no action\n";
+        std::cout << "4) Go to main menu\n";
         std::cin >> choice;
 
         if (choice == 1) {
@@ -1143,11 +1143,11 @@ int main() {
         std::cout << "1) Delete a rocket\n";
         std::cout << "2) View a rocket\n";
         std::cout << "3) Edit a rocket\n";
-        std::cout << "4) Take no action\n";
+        std::cout << "4) Go to main menu\n";
         std::cin >> choice;
         if (choice == 1) {
           //Delete the rocket (Same as stage, code for code but stage is replaced with rocket)
-          std::cout << "Which stage would you like to remove? (Please in their number in order, not their code or name)\n";
+          std::cout << "Which rocket would you like to remove? (Please in their number in order, not their code or name)\n";
           std::cin >> choice;
           if (choice < rocketVector.size() + 1 && choice > 0) {
             // This code both deletes the file, removes it from the vector, and removes directory from permanent storage
@@ -1343,7 +1343,69 @@ int main() {
           }
           }
         } else if (choice == 3) {
-          //Edit a rocket (Hell on earth)
+          std::cout << "You have opted to edit a rocket. What action would you like to take?\n";
+					std::cout << "1) Rename rocket\n";
+					std::cout << "2) Switch out rocket stages (Including removing, adding, and re-ordering stages)\n";
+					std::cout << "3) Go to main menu\n";
+					std::cout << "4) Quit Rocket-X\n";
+					std::cin >> choice2;
+					switch (choice2) {
+						case 1: {
+							std::cout << "What rocket would you like to rename?\n";
+							std::cin >> choice;
+							std::cout << "The old name of the rocket is " << rocketVector[choice-1].rocketName << " " << rocketVector[choice-1].rocketNumber << ". What would you like the new name to be?\n";
+							std::cin >> stringChoice;
+							std::cout << "What do you want your new rocket number to be?\n";
+							std::cin >> choice2;
+        			auto choiceS2 = std::to_string(choice2); // choiceS2 is new code, ChoiceBackupS is old name
+							auto choiceBackupS = std::to_string(rocketVector[choice-1].rocketNumber);
+       				std::ifstream myfile(stringChoice + choiceS2 + "R.txt");
+        			//Checks to make sure that the user is not overwriting a rocket without realizing it. if the file is open, that means that a file already exists when it shouldn't
+        			if (myfile.is_open()) {
+          			std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice2 << ". Do you want to overwrite it? 1: Yes, 0: No\n";
+          			std::cin >> choice2;
+          			if (!choice2) {
+            			break;
+         			 	} else {
+           			 	erase_line_rocket(stringChoice + choiceS2.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
+          			}
+							}
+							erase_line_rocket(rocketVector[choice-1].rocketName + choiceBackupS.c_str() + "R.txt");
+							std::fstream rocketNamePermanentStorage;
+        			rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
+        			rocketNamePermanentStorage << stringChoice << choiceS2.c_str() << "R.txt\n";
+        			rocketNamePermanentStorage.close();
+							//delete original file
+							if (remove((rocketVector[choice-1].rocketName + choiceBackupS + ".txt").c_str()) != 0)
+    						perror("Error deleting file");
+							//create new file with new name
+							std::ofstream outfile {
+          			stringChoice + choiceS2 + "R.txt"
+        			};
+							//Write edited new data into new file
+							outfile << stringChoice;
+							outfile << choiceS2;
+							for (int a; a < rocketVector[choice-1].stageList.size(); a++) {
+								//stageVector
+								//outfile << rocketVector[choice-1].stageList[a].sISP;
+							}
+							break;
+						}
+						case 2: {
+
+							break;
+						}
+						case 3: {
+							//Take no action (already doing that)
+							break;
+						}
+						case 4: {
+							std::cout << "\033[2J\033[0;0H";
+            	std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+            	return 0;
+							break;
+						}
+					}
         } else if (choice == 4) {
           //Take no action (already doing that)
         }
@@ -1413,7 +1475,7 @@ brittle as slate, we need this thing to be iron by the end of the semester! That
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
 
 Immediate Issues:
-
+Renaming rockets doesn't rename name and code in R.txt file
 
 TODO Long term
 -Give sources for more details
