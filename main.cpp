@@ -15,6 +15,7 @@ class Stage {
     //Attributes
     double sF, sISP, sM0, sMF, sA, sTWR, sDV, sT, sG;
   int stageNumber;
+	int stageIndex;
   std::string StageName;
   //Functions
   void set_values(double, double, double, double, double);
@@ -304,6 +305,7 @@ int main() {
   //Vectors
   std::vector < Stage > stageVector;
   std::vector < Rocket > rocketVector;
+	std::vector < std::string > lines;
 
   //Opening permanent storage text files
   std::fstream FileNames;
@@ -357,6 +359,7 @@ int main() {
   FileNames.clear();
   FileNames.seekg(0);
   for (int k = 0; k < number_of_lines; k++) {
+		stageObject.stageIndex = k;
     //std::getline(std::setprecision(2));
     GotoLine(FileNames, k + 1);
     std::getline(FileNames, line);
@@ -898,7 +901,7 @@ int main() {
         floatChoice[4] = UpdatedCin("G PermanentStorage", "Current gravity (m/s/s)");
         RecordInfo(floatChoice[4], "G PermanentStorage");
         stageObject.set_values(floatChoice[0], floatChoice[1], floatChoice[2], floatChoice[3], floatChoice[4]);
-
+				stageObject.stageIndex = stageVector.size() + 1;
         stageVector.push_back(stageObject);
         stageObject.create_File(stringChoice, choiceBackup, 1);
         myfile.close();
@@ -929,7 +932,8 @@ int main() {
         std::cout << "1) Delete a stage\n";
         std::cout << "2) View a stage\n";
         std::cout << "3) Edit a stage\n";
-        std::cout << "4) Go to main menu\n";
+				std::cout << "4) Rename a stage\n";
+        std::cout << "5) Go to main menu\n";
         std::cin >> choice;
 
         if (choice == 1) {
@@ -1044,6 +1048,73 @@ int main() {
           stageVector[choice - 1].create_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber, 0); // Creates a new file with new values
           //The program doesn't have to worry about 2 directorys in permanent storage, since that was taken care of in the create_file function
         } else if (choice == 4) {
+					std::cout << "Which stage would you like to rename?\n";
+					std::cin >> choice;
+					std::cout << "The old name of the stage is " << stageVector[choice-1].StageName << " " << stageVector[choice-1].stageNumber << ". What would you like the new name to be?\n";
+					std::cin >> stringChoice;
+					std::cout << "What do you want your new stage number to be?\n";
+					std::cin >> choice2;
+        	auto choiceS2 = std::to_string(choice2); // choiceS2 is new code, ChoiceBackupS is old name
+					auto choiceBackupS = std::to_string(stageVector[choice-1].stageNumber);
+       		std::ifstream myfile(stringChoice + choiceS2 + ".txt");
+        	//Checks to make sure that the user is not overwriting a stage without realizing it. if the file is open, that means that a file already exists when it shouldn't
+        	if (myfile.is_open()) {
+          	std::cout << "WARNING, you already have a stage called: " << stringChoice << " with a code: " << choice2 << ". Do you want to overwrite it? 1: Yes, 0: No\n";
+          	std::cin >> choice2;
+          	if (!choice2) {
+          			break;
+         	 	} else {
+          		 	erase_line(stringChoice + choiceS2.c_str() + ".txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
+          	}
+					}
+					erase_line(stageVector[choice-1].StageName + choiceBackupS.c_str() + ".txt");
+					std::fstream FileNamePermanentStorage;
+        	FileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
+        	//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
+					while (getline(FileNamePermanentStorage, line)) {
+						lines.push_back(line);
+					}
+					for (int z = 0; z < lines.size(); z ++) {
+						if (lines[z] == stringChoice + std::to_string(stageVector[choice-1].stageNumber) + ".txt") {
+							FileNamePermanentStorage << lines[z];
+						} else {
+							FileNamePermanentStorage << stringChoice << choiceS2.c_str() << ".txt\n";
+							z++;
+						}
+					}
+        	FileNamePermanentStorage.close();
+					//delete original file
+					if (remove((stageVector[choice-1].StageName + choiceBackupS + ".txt").c_str()) != 0)
+    				perror("Error deleting file");
+					//create new file with new name
+					std::ofstream outfile {
+          	stringChoice + choiceS2 + ".txt"
+        	};
+					//Write edited new data into new file
+					outfile << std::fixed; //To disallow scientific notation, which the program can't read
+  				outfile << stringChoice << std::endl;
+  				outfile << choice2 << std::endl;
+  				outfile << stageVector[choice-1].sF << std::endl;
+  				outfile << stageVector[choice-1].sISP << std::endl;
+  				outfile << stageVector[choice-1].sM0 << std::endl;
+  				outfile << stageVector[choice-1].sMF << std::endl;
+  				outfile << stageVector[choice-1].sA << std::endl;
+  				outfile << stageVector[choice-1].sTWR << std::endl;
+  				outfile << stageVector[choice-1].sDV << std::endl;
+  				outfile << stageVector[choice-1].sT << std::endl;
+  				outfile << stageVector[choice-1].sG << std::endl;
+					//Checks through each rocket to check if the renamed stage is included, if so, it switches the names
+					for (int v = 0; v < rocketVector.size(); v++) {
+						for (int o = 0; o < rocketVector[v].stageList.size(); o++) {
+							if (rocketVector[v].stageList[o].StageName == stageVector[choice-1].StageName && rocketVector[v].stageList[o].stageNumber == stageVector[choice-1].stageNumber) {
+								rocketVector[v].stageList[o].StageName = stringChoice;
+								rocketVector[v].stageList[o].stageNumber = choice2;
+							}
+						}
+					}
+					stageVector[choice-1].StageName = stringChoice;
+					stageVector[choice-1].stageNumber = choice2;	
+				} else if (choice == 5) {
           //Do nothing I guess idk. I feel like I maybe should, but idc really
         }
         break;
@@ -1373,22 +1444,34 @@ int main() {
 							erase_line_rocket(rocketVector[choice-1].rocketName + choiceBackupS.c_str() + "R.txt");
 							std::fstream rocketNamePermanentStorage;
         			rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
-        			rocketNamePermanentStorage << stringChoice << choiceS2.c_str() << "R.txt\n";
+							//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
+							while (getline(rocketNamePermanentStorage, line)) {
+								lines.push_back(line);
+							}
+							for (int z = 0; z < lines.size(); z ++) {
+								if (lines[z] == stringChoice + std::to_string(rocketVector[choice-1].rocketNumber) + "R.txt") {
+									rocketNamePermanentStorage << lines[z];
+								} else {
+									rocketNamePermanentStorage << stringChoice << choiceS2.c_str() << "R.txt\n";
+									z++;
+								}
+							}
         			rocketNamePermanentStorage.close();
 							//delete original file
-							if (remove((rocketVector[choice-1].rocketName + choiceBackupS + ".txt").c_str()) != 0)
+							if (remove((rocketVector[choice-1].rocketName + choiceBackupS + "R.txt").c_str()) != 0)
     						perror("Error deleting file");
 							//create new file with new name
 							std::ofstream outfile {
           			stringChoice + choiceS2 + "R.txt"
         			};
 							//Write edited new data into new file
-							outfile << stringChoice;
-							outfile << choiceS2;
+							outfile << stringChoice << std::endl;
+							outfile << choiceS2 << std::endl;
 							for (int a; a < rocketVector[choice-1].stageList.size(); a++) {
-								//stageVector
-								//outfile << rocketVector[choice-1].stageList[a].sISP;
+								outfile << rocketVector[choice-1].stageList[a].stageIndex << std::endl;
 							}
+							rocketVector[choice-1].rocketName = stringChoice;
+							rocketVector[choice-1].rocketNumber = choice2;
 							break;
 						}
 						case 2: {
@@ -1475,7 +1558,9 @@ brittle as slate, we need this thing to be iron by the end of the semester! That
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
 
 Immediate Issues:
-Renaming rockets doesn't rename name and code in R.txt file
+Renaming stages and rockets put them to the back of the list. This causes issues especially for stages.
+Re-writing file name in permanent storage during renaming sequence does not recognize duplicate.
+Basicly, the program isn't writing in the directory of the re-named rocket if that makes more sense.
 
 TODO Long term
 -Give sources for more details
