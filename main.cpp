@@ -1067,15 +1067,20 @@ int main() {
           		 	erase_line(stringChoice + choiceS2.c_str() + ".txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
           	}
 					}
-					erase_line(stageVector[choice-1].StageName + choiceBackupS.c_str() + ".txt");
 					std::fstream FileNamePermanentStorage;
         	FileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
-        	//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
+					if (FileNamePermanentStorage.is_open()) {
+						std::cout << "Alls good!\n";
+					} else {
+						std::cout << "WE ARE ALL GOING TO DIE AGGGGGGGGGGHHHHHHH!\n";
+					}
+					//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
+					
 					while (getline(FileNamePermanentStorage, line)) {
 						lines.push_back(line);
 					}
 					for (int z = 0; z < lines.size(); z ++) {
-						if (lines[z] == stringChoice + std::to_string(stageVector[choice-1].stageNumber) + ".txt") {
+						if (lines[z] != stageVector[choice-1].StageName + choiceBackupS.c_str() + ".txt") {
 							FileNamePermanentStorage << lines[z];
 						} else {
 							FileNamePermanentStorage << stringChoice << choiceS2.c_str() << ".txt\n";
@@ -1114,6 +1119,15 @@ int main() {
 					}
 					stageVector[choice-1].StageName = stringChoice;
 					stageVector[choice-1].stageNumber = choice2;	
+					std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+        	std::cin >> choice;
+        	if (choice == 1) {
+        	  break;
+        	} else {
+        	  std::cout << "\033[2J\033[0;0H";
+        	  std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+        	  return 0;
+        	}
 				} else if (choice == 5) {
           //Do nothing I guess idk. I feel like I maybe should, but idc really
         }
@@ -1445,6 +1459,8 @@ int main() {
 							std::fstream rocketNamePermanentStorage;
         			rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
 							//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
+							rocketNamePermanentStorage.clear();
+ 							rocketNamePermanentStorage.seekg(0);
 							while (getline(rocketNamePermanentStorage, line)) {
 								lines.push_back(line);
 							}
@@ -1558,10 +1574,8 @@ brittle as slate, we need this thing to be iron by the end of the semester! That
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
 
 Immediate Issues:
-Renaming stages and rockets put them to the back of the list. This causes issues especially for stages.
-Re-writing file name in permanent storage during renaming sequence does not recognize duplicate.
-Basicly, the program isn't writing in the directory of the re-named rocket if that makes more sense.
-
+For some reason, when renaming stages (and rockets, but I'm working on stages and will then copy to rockets),
+(Cont) it doesn't read the FileName Permanenet storage file and replace old directory with renamed one
 TODO Long term
 -Give sources for more details
 -Add budgeting menu (distance this stage can travel)
