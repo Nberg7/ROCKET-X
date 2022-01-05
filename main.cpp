@@ -1072,7 +1072,7 @@ int main() {
 					if (FileNamePermanentStorage.is_open()) {
 						std::cout << "Alls good!\n";
 					} else {
-						std::cout << "WE ARE ALL GOING TO DIE AGGGGGGGGGGHHHHHHH!\n";
+						std::cout << "Hmm. There seems to have been a catastrophe...\n";
 					}
 					//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
 					
@@ -1491,7 +1491,48 @@ int main() {
 							break;
 						}
 						case 2: {
-
+							std::cout << "What rocket would you like to re-order?\n";
+							std::cin >> choice;
+							std::cout << "You have chosen to re-order the rocket " << rocketVector[choice-1].rocketName << " " << rocketVector[choice-1].rocketNumber << std::endl;
+							std::cout << "Stages: (";
+							for (int v = 0; v < rocketVector[choice-1].stageList.size(); v++) {
+            		std::cout << rocketVector[choice-1].stageList[v].StageName << rocketVector[choice-1].stageList[v].stageNumber;
+            		if (v + 1 < rocketVector[choice-1].stageList.size()) // Makes sure that it isn't the last time runnig the loop 
+            		{
+            		  std::cout << ", ";
+           			}
+							}
+							std::cout << ")\n";
+							while (true) {
+								std::cout << "Which stage would you like to move?\n";
+								std::cin >> choice2;
+								std::cout << "This stage was " << rocketVector[choice-1].stageList[choice2-1].stageIndex << " in line. What would you like it to be now?\n";
+								std::cin >> choiceBackup;					
+								//Needs to change in rocket text file
+								//change in current vector
+								std::ifstream rocketFile;
+								auto choiceS2 = std::to_string(rocketVector[choice2].rocketNumber);
+   							rocketFile.open(choiceS2 + rocketVector[choice2].rocketName + "R.txt", std::ios::in);
+								//Deletes old file contents and writes in the new stuff
+								//rewrite contents of file to the file but change order of the stages
+								rocketVector[choice-1].stageList.insert(rocketVector[choice-1].stageList.begin() + choiceBackup - 1, rocketVector[choice-1].stageList[choice2-1]);
+							  rocketVector[choice-1].stageList.erase(rocketVector[choice-1].stageList.begin() + choice2 - 1);
+								std::cout << "The new ordering: (";
+								for (int v = 0; v < rocketVector[choice-1].stageList.size(); v++) {
+            		std::cout << rocketVector[choice-1].stageList[v].StageName << rocketVector[choice-1].stageList[v].stageNumber;
+            		if (v + 1 < rocketVector[choice-1].stageList.size()) // Makes sure that it isn't the last time runnig the loop 
+            		{
+            		  std::cout << ", ";
+           			}
+							}
+							std::cout << ")\n";
+							std::cout << "Would you like to move another stage? 1: Yes 0: No\n";
+							std::cin >> choice2;
+							if (!choice2) {
+								break;
+							}
+          }
+          std::cout << ")\n";
 							break;
 						}
 						case 3: {
@@ -1561,7 +1602,7 @@ Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
 -The only things left is the editing branch!
--For next week: Edit rockets (and fix issues too a little)! This includes moving stages, removing stages, adding stages, 
+-For next week: Edit rockets (and fix issues too a little)! This includes moving stages, removing stages, adding stages (To rockets), 
 renaming the rocket, perhaps renaming the stages! 
 -Once editing rockets are done, ROCKET-X Beta will be almost complete!
 -Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu and other similarly large ideas

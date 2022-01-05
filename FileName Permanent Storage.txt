@@ -1,6 +1,6 @@
 SIC1.txt
 SII1.txt
 SIVI1.txt
-BottomyStage1.txt
+BottomStage1.txt
 MiddleStage2.txt
 TopStage3.txt
