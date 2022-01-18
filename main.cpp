@@ -1508,28 +1508,18 @@ int main() {
 								std::cin >> choice2; //1
 								std::cout << "This stage was " << choice2 << " in line. What would you like it to be now?\n";
 								std::cin >> choiceBackup;					//3
-								//Needs to change in rocket text file
-								//change in current vector
+								rocketVector[choice-1].stageList.erase(rocketVector[choice-1].stageList.begin() + choice2-1);
+								rocketVector[choice-1].stageList.insert(rocketVector[choice-1].stageList.begin() + choiceBackup-1, rocketVector[choice-1].stageList[choice2]);
 								std::ofstream rocketFile;
 								auto choiceS2 = std::to_string(rocketVector[choice-1].rocketNumber);
    							rocketFile.open(rocketVector[choice-1].rocketName + choiceS2 + "R.txt", std::ios::out);
 								rocketFile << rocketVector[choice-1].rocketName << std::endl;
 								rocketFile << rocketVector[choice-1].rocketNumber << std::endl;
 								for (int f = 0; f < rocketVector[choice-1].stageList.size(); f++) {
-									if (f == choice2 - 1) {
-										rocketFile << rocketVector[choice-1].stageList[f+1].stageIndex << std::endl;
-										f++;
-									} else if (f == choiceBackup - 1) {
-										rocketFile << rocketVector[choice-1].stageList[choice2-1].stageIndex << std::endl;
-									} else {
-										rocketFile << rocketVector[choice-1].stageList[f].stageIndex << std::endl;
-									}
+									rocketFile << rocketVector[choice-1].stageList[f].stageIndex << std::endl;
 								}
+
 								rocketFile.close();
-								//Deletes old file contents and writes in the new stuff
-								//rewrite contents of file to the file but change order of the stages
-								rocketVector[choice-1].stageList.insert(rocketVector[choice-1].stageList.begin() + choiceBackup, rocketVector[choice-1].stageList[choice2-1]);
-							  rocketVector[choice-1].stageList.erase(rocketVector[choice-1].stageList.begin() + choice2 - 1);
 								std::cout << "The new ordering: (";
 								for (int v = 0; v < rocketVector[choice-1].stageList.size(); v++) {
             		std::cout << rocketVector[choice-1].stageList[v].StageName << rocketVector[choice-1].stageList[v].stageNumber;
@@ -1630,6 +1620,7 @@ Immediate Issues:
 Debug re-ordering stages and find out why the text files don't update correctly to new ordering.
 For some reason, when renaming stages (and rockets, but I'm working on stages and will then copy to rockets),
 (Cont) it doesn't read the FileName Permanenet storage file and replace old directory with renamed one
+
 TODO Long term
 -Give sources for more details
 -Add budgeting menu (distance this stage can travel)
