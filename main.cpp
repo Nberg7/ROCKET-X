@@ -285,6 +285,7 @@ int main() {
   //Integer variables
   int choice;
   int choice2;
+	int choice3;
   int choiceBackup;
   int number_of_lines = 0;
 
@@ -449,7 +450,7 @@ int main() {
     std::cout << "Welcome to ROCKET-X!\n";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
     std::cout << "This calculator is still in it's early form, so please forgive any lacking features.\n";
-    std::cout << "\nThis calculator has 2 views currently. 1 is calculations, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open. Enter 3 to quit.\n";
+    std::cout << "\nThis calculator has 2 views currently. 1 is calculations and extra details, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open. Enter 3 to quit.\n";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
     std::cin >> choice;
@@ -853,9 +854,8 @@ int main() {
       std::cout << "2) View stages created\n";
       std::cout << "3) Create rockets\n";
       std::cout << "4) View rockets created\n";
-      std::cout << "5) View budgeting menu\n";
-      std::cout << "6) Exit back to main menu\n";
-      std::cout << "7) Exit ROCKET-X\n";
+      std::cout << "5) Exit back to main menu\n";
+      std::cout << "6) Exit ROCKET-X\n";
       std::cin >> choice;
 
       switch (choice) {
@@ -1505,11 +1505,12 @@ int main() {
 							std::cout << ")\n";
 							while (true) {
 								std::cout << "Which stage would you like to move?\n";
-								std::cin >> choice2; //1
+								std::cin >> choice2;
 								std::cout << "This stage was " << choice2 << " in line. What would you like it to be now?\n";
-								std::cin >> choiceBackup;					//3
+								std::cin >> choiceBackup;
+								choice3 = rocketVector[choice-1].stageList[choice2-1].stageIndex;
 								rocketVector[choice-1].stageList.erase(rocketVector[choice-1].stageList.begin() + choice2-1);
-								rocketVector[choice-1].stageList.insert(rocketVector[choice-1].stageList.begin() + choiceBackup-1, rocketVector[choice-1].stageList[choice2]);
+								rocketVector[choice-1].stageList.insert(rocketVector[choice-1].stageList.begin() + choiceBackup - 1, stageVector[choice3]); // try choiceBackup
 								std::ofstream rocketFile;
 								auto choiceS2 = std::to_string(rocketVector[choice-1].rocketNumber);
    							rocketFile.open(rocketVector[choice-1].rocketName + choiceS2 + "R.txt", std::ios::out);
@@ -1553,18 +1554,12 @@ int main() {
         }
         break;
       }
-
       case 5: {
-        //Budgeting menu
-        break;
-      }
-
-      case 6: {
         NotgoToMainMenu = false;
         break;
       }
 
-      case 7: {
+      case 6: {
         std::cout << "\033[2J\033[0;0H";
         std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
         return 0;
@@ -1603,10 +1598,9 @@ int main() {
 Reminders:
 -Do not use RocketObject unless needed to! Use rocketVector instead
 -COMMENT!
--The only things left is the editing branch!
--For next week: Edit rockets (and fix issues too a little)! This includes moving stages, removing stages, adding stages (To rockets), 
-renaming the rocket, perhaps renaming the stages! 
--Once editing rockets are done, ROCKET-X Beta will be almost complete!
+-The only things left is the bug fixing!
+-The semester is almost over, and so in the short time left begin to triage.Is renaming a pain? Delete it. If anything isn't working after a day of work and isn't looking better
+THEN JUST SKIP IT! Try to get as much bug fixing as possible done as quickly as possible.
 -Do some heavy bugfinding, then when the rocket and stages system is airtight, move on to budgeting menu and other similarly large ideas
 -Rocketname storage and storage is finicky. Make sure that there is a newline at the end, and really don't un-format it by hand, otherwise, it works
 
@@ -1617,17 +1611,13 @@ brittle as slate, we need this thing to be iron by the end of the semester! That
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
 
 Immediate Issues:
-Debug re-ordering stages and find out why the text files don't update correctly to new ordering.
-For some reason, when renaming stages (and rockets, but I'm working on stages and will then copy to rockets),
-(Cont) it doesn't read the FileName Permanenet storage file and replace old directory with renamed one
+
 
 TODO Long term
 -Give sources for more details
--Add budgeting menu (distance this stage can travel)
+
 
 TODO short term
--Make rocket editor
--Rename a stage
 -Fix issues
 
 IDEAS
