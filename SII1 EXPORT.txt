@@ -1,0 +1,19 @@
+                STAGE EXPORT SHEET - SII 1 ROCKET                
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                Details                
+Name: SII 1
+Wet mass: 480 Tonnes
+Dry mass: 36.2 Tonnes
+∆V: 10671.3 Meters/Second/Second
+Thrust: 4400 Kilonewtons
+
+                Rockets                
+This stage was included in these rockets: Saturn 5
+
+                Detailed Stats                
+Fuel: 443.8 Tonnes
+Specific Impulse: 421 Seconds
+Acceleration: 121.547 Meters/Second/Second
+Thrust to Weight ratio: 12.3943
+Current Gravity: 9.80665 Meters/Second/Second

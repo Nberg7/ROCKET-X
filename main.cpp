@@ -933,7 +933,8 @@ int main() {
         std::cout << "2) View a stage\n";
         std::cout << "3) Edit a stage\n";
 				std::cout << "4) Rename a stage\n";
-        std::cout << "5) Go to main menu\n";
+				std::cout << "5) Export a stage\n";
+        std::cout << "6) Go to main menu\n";
         std::cin >> choice;
 
         if (choice == 1) {
@@ -1129,8 +1130,50 @@ int main() {
         	  return 0;
         	}
 				} else if (choice == 5) {
-          //Do nothing I guess idk. I feel like I maybe should, but idc really
-        }
+					std::cout << "Which stage would you like to export?\n";
+					std::cin >> choice;
+          auto codeS = std::to_string(stageVector[choice - 1].stageNumber);
+          std::ofstream outfile;
+          outfile.open(stageVector[choice - 1].StageName + codeS + " EXPORT.txt");
+          outfile << "                STAGE EXPORT SHEET - " << stageVector[choice - 1].StageName << " " << codeS << " ROCKET                \n"; // Centered bold big
+          outfile << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+          outfile << "\n                Details                \n"; // Centered bold
+          outfile << "Name: " << stageVector[choice - 1].StageName << " " << codeS << "\n";
+          outfile << "Wet mass: " << stageVector[choice - 1].sM0 << " Tonnes\n";
+          outfile << "Dry mass: " << stageVector[choice - 1].sMF << " Tonnes\n";
+          outfile << "∆V: " << stageVector[choice - 1].sDV << " Meters/Second/Second\n";
+          outfile << "Thrust: " << stageVector[choice - 1].sT << " Kilonewtons\n";
+					outfile << "\n                Rockets                \n"; // Centered bold
+					outfile << "This stage was included in these rockets: ";
+					for (int p = 0; p < rocketVector.size(); p++) {
+						for (int t = 0; t < rocketVector[p].stageList.size(); t++) {
+							if (stageVector[choice - 1].stageIndex == rocketVector[p].stageList[t].stageIndex) {
+									outfile << rocketVector[p].rocketName << " " << rocketVector[p].rocketNumber;
+									t = rocketVector[p].stageList.size();
+							}
+						}
+					}
+					outfile << "\n\n                Detailed Stats                \n";
+					outfile << "Fuel: " << stageVector[choice - 1].sF << " Tonnes\n";
+					outfile << "Specific Impulse: " << stageVector[choice - 1].sISP << " Seconds\n";
+					outfile << "Acceleration: " << stageVector[choice - 1].sA << " Meters/Second/Second\n";
+					outfile << "Thrust to Weight ratio: " << stageVector[choice - 1].sTWR << std::endl;
+					outfile << "Current Gravity: " << stageVector[choice - 1].sG << " Meters/Second/Second\n";
+					outfile.close();
+          std::cout << "You have chosen to export a stage to a text file. ROCKET-X has a file ready for you to download, it is called: " << stageVector[choice - 1].StageName << codeS << " EXPORT.txt" << std::endl;
+          std::cout << "\nWould you like return to the main menu (1), or quit the program (2)?\n";
+          std::cin >> choice;
+          if (choice == 1) {
+            break;
+          } else {
+          	std::cout << "\033[2J\033[0;0H";
+            std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+            return 0;
+          }
+          break;
+				} else if (choice ==6 ) {
+					//Do nothing I guess idk. I feel like I maybe should, but idc really
+				}
         break;
       }
 

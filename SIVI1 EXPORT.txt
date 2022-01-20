@@ -1,0 +1,19 @@
+                STAGE EXPORT SHEET - SIVI 1 ROCKET                
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                Details                
+Name: SIVI 1
+Wet mass: 123 Tonnes
+Dry mass: 10.9 Tonnes
+∆V: 10005.3 Meters/Second/Second
+Thrust: 1033.1 Kilonewtons
+
+                Rockets                
+This stage was included in these rockets: Saturn 5
+
+                Detailed Stats                
+Fuel: 112.1 Tonnes
+Specific Impulse: 421 Seconds
+Acceleration: 94.7798 Meters/Second/Second
+Thrust to Weight ratio: 9.66485
+Current Gravity: 9.80665 Meters/Second/Second

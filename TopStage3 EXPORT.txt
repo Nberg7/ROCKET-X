@@ -1,0 +1,19 @@
+                STAGE EXPORT SHEET - TopStage 3 ROCKET                
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                Details                
+Name: TopStage 3
+Wet mass: 120 Tonnes
+Dry mass: 15 Tonnes
+∆V: 8585.18 Meters/Second/Second
+Thrust: 250 Kilonewtons
+
+                Rockets                
+This stage was included in these rockets: SimpleRocket 22
+
+                Detailed Stats                
+Fuel: 105 Tonnes
+Specific Impulse: 421 Seconds
+Acceleration: 16.6667 Meters/Second/Second
+Thrust to Weight ratio: 1.69953
+Current Gravity: 9.80665 Meters/Second/Second
