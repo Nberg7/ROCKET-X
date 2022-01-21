@@ -752,9 +752,10 @@ int main() {
         std::cout << "What would you like to inquire about? \n";
         std::cout << "1) What formulas are used? \n";
         std::cout << "2) What do the variable names mean? \n";
-        std::cout << "3) What sources can I use to find out more? \n";
-        std::cout << "4) What is planned for the future of ROCKET-X? \n";
-        std::cout << "5) Who is the author of this program? \n";
+        std::cout << "3) What is planned for the future of ROCKET-X? \n";
+        std::cout << "4) Who is the author of this program? \n";
+				std::cout << "5) Return to main menu\n";
+				std::cout << "6) Exit Rocket-X\n";
         std::cin >> choice;
 
         switch (choice) {
@@ -787,11 +788,18 @@ int main() {
           break;
         }
 
-        case 3: { // I have yet to collect all the sources used. Most are from wikipedia, online threads, nasa pages, or stack overflow
+        case 5: { // I have yet to collect all the sources used. Most are from wikipedia, online threads, nasa pages, or stack overflow
           break;
         }
 
-        case 4: {
+				case 6: { // I have yet to collect all the sources used. Most are from wikipedia, online threads, nasa pages, or stack overflow
+        	//Quits the program
+        	std::cout << "\033[2J\033[0;0H";
+        	std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+        	return 0;
+        }
+
+        case 3: {
           std::cout << "\033[2J\033[0;0H";
           std::cout << "What is planned for the future of ROCKET-X?\n";
           std::cout << "I have quite a few thoughts about where I will take ROCKET-X, but before I continue, I would like to warn you that there is great chance that ROCKET-X never becomes anything greater than what it is now, I have plans, but no guarantees that I will be working on ROCKET-X much longer than I have already.\n";
@@ -805,7 +813,7 @@ int main() {
           break;
         }
 
-        case 5: {
+        case 4: {
           std::cout << "\033[2J\033[0;0H";
           std::cout << "Hello, I am the author of ROCKET-X! My name is Nate Berglas, and I love all rocket science. ";
           std::cout << "I made this over the course of a semester in grade 11 computer science course. I studied all sorts of equations, ";
@@ -944,15 +952,6 @@ int main() {
             for (int g = 0; g < rocketVector[l].stageList.size(); g++) {
               if (rocketVector[l].stageList[g].StageName == stageVector[choice - 1].StageName && rocketVector[l].stageList[g].stageNumber == stageVector[choice - 1].stageNumber) {
                 std::cout << "This stage is currently being used in a rocket. You  must first remove this stage from the rocket to continue.\n";
-                std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
-                std::cin >> choice;
-                if (choice == 1) {
-                  goto MAINMENU;
-                } else {
-                  std::cout << "\033[2J\033[0;0H";
-                  std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
-                  return 0;
-                }
               }
             }
           }
@@ -965,6 +964,8 @@ int main() {
           } else {
             std::cout << "Removing the stage failed, please input a correct value.\n";
             std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+          }
+					std::cout << "\nWould you like return to the main menu (1), or quit the program (2)?\n";
             std::cin >> choice;
             if (choice == 1) {
               break;
@@ -973,7 +974,6 @@ int main() {
               std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
               return 0;
             }
-          }
         } else if (choice == 2) {
           //Very simple, the program just runs over every value and cout's it
           std::cout << "What stage would you like to view?\n";
@@ -1048,7 +1048,17 @@ int main() {
           stageVector[choice - 1].remove_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber); // This removes the old file, so there isn't two files
           stageVector[choice - 1].create_File(stageVector[choice - 1].StageName, stageVector[choice - 1].stageNumber, 0); // Creates a new file with new values
           //The program doesn't have to worry about 2 directorys in permanent storage, since that was taken care of in the create_file function
-        } else if (choice == 4) {
+					std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+          std::cin >> choice;
+          if (choice == 1) {
+            break;
+					}
+           else {
+            std::cout << "\033[2J\033[0;0H";
+            std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+            return 0;
+          }
+				} else if (choice == 4) {
 					std::cout << "Which stage would you like to rename?\n";
 					std::cin >> choice;
 					std::cout << "The old name of the stage is " << stageVector[choice-1].StageName << " " << stageVector[choice-1].stageNumber << ". What would you like the new name to be?\n";
@@ -1285,15 +1295,15 @@ int main() {
             rocketVector.erase(rocketVector.begin() + choice - 1);
           } else {
             std::cout << "Removing the rocket has failed, please input a correct value.\n";
-            std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
-            std::cin >> choice;
-            if (choice == 1) {
-              break;
-            } else {
-              std::cout << "\033[2J\033[0;0H";
-              std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
-              return 0;
-            }
+          }
+					std::cout << "\nWould you like return to the main menu (1), or quit the program (2)?\n";
+          std::cin >> choice;
+          if (choice == 1) {
+          	break;
+          } else {
+            std::cout << "\033[2J\033[0;0H";
+            std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+            return 0;
           }
         } else if (choice == 2) {
           std::cout << "You have chosen to view a rocket. Which rocket would you like to view?\n";
@@ -1652,16 +1662,6 @@ Long term Issues:
 -There are lots of issues, if I push the program basicly at all it just returns to the main menu, it's as 
 brittle as slate, we need this thing to be iron by the end of the semester! That means lots of bugfinding and
 bugfixing to do. Also, accounting for user stupidity like entering a string where it should be an integer
-
-Immediate Issues:
-
-
-TODO Long term
--Give sources for more details
-
-
-TODO short term
--Fix issues
 
 IDEAS
 -For stages, there should be a rocket, and then you can choose premade stages you have made into the rocket, and order them around.

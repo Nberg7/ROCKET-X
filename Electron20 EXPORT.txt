@@ -1,0 +1,19 @@
+                STAGE EXPORT SHEET - Electron 20 ROCKET                
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                Details                
+Name: Electron 20
+Wet mass: 220 Tonnes
+Dry mass: 25 Tonnes
+∆V: 8317.54 Meters/Second/Second
+Thrust: 200 Kilonewtons
+
+                Rockets                
+This stage was included in these rockets: Proton 2
+
+                Detailed Stats                
+Fuel: 195 Tonnes
+Specific Impulse: 390 Seconds
+Acceleration: 8 Meters/Second/Second
+Thrust to Weight ratio: 0.815494
+Current Gravity: 9.81 Meters/Second/Second
