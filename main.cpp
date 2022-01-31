@@ -243,7 +243,7 @@ void erase_line(std::string fileName) {
   if (inFile) {
     while (getline(inFile, line, '\n')) {
       //if the line read is not same as string searched for then write it into the output.txt file
-      if (line != stringtobeSearched) {
+      if (line != stringtobeSearched && line != "" && line != "\n") {
         outFile << line << "\n";
       }
     }
@@ -1079,20 +1079,24 @@ int main() {
           	}
 					}
 					std::fstream FileNamePermanentStorage;
-        	FileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::app);
+        	FileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::in);
 					if (FileNamePermanentStorage.is_open()) {
-						std::cout << "Alls good!\n";
+						//std::cout << "Alls good!\n";
 					} else {
 						std::cout << "Hmm. There seems to have been a catastrophe...\n";
+						return 0;
 					}
 					//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
-					
-					while (getline(FileNamePermanentStorage, line)) {
+					FileNamePermanentStorage.clear();
+    			FileNamePermanentStorage.seekg(0);
+					while (std::getline(FileNamePermanentStorage, line)) {
 						lines.push_back(line);
 					}
+					FileNamePermanentStorage.close();
+					FileNamePermanentStorage.open("FileName Permanent Storage.txt", std::ios::out);
 					for (int z = 0; z < lines.size(); z ++) {
 						if (lines[z] != stageVector[choice-1].StageName + choiceBackupS.c_str() + ".txt") {
-							FileNamePermanentStorage << lines[z];
+							FileNamePermanentStorage << lines[z] << std::endl;
 						} else {
 							FileNamePermanentStorage << stringChoice << choiceS2.c_str() << ".txt\n";
 							z++;
@@ -1202,14 +1206,25 @@ int main() {
         std::ifstream myfile(stringChoice + choiceS2 + "R.txt");
         //Checks to make sure that the user is not overwriting a rocket without realizing it. if the file is open, that means that a file already exists when it shouldn't
         if (myfile.is_open()) {
-          std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice << ". Do you want to overwrite it? 1: Yes, 0: No\n";
-          std::cin >> choice2;
-          if (!choice2) {
-            break;
-          } else {
-            auto choiceBackupS = std::to_string(choice);
-            erase_line_rocket(stringChoice + choiceBackupS.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
-          }
+          std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice << ".\n";
+          //std::cin >> choice2;
+          //if (!choice2) {
+           // break;
+          //} else {
+           // auto choiceBackupS = std::to_string(choice);
+            //erase_line_rocket(stringChoice + choiceBackupS.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
+						//rocketVector.
+					//}
+					std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+        	std::cin >> choice;
+       	 if (choice == 1) {
+       	   break;
+      	  } else {
+        	  std::cout << "\033[2J\033[0;0H";
+        	  std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+         	 return 0;
+        	}
+        break;
         }
         auto codeS = std::to_string(choice);
         std::ofstream outfile {
@@ -1500,26 +1515,38 @@ int main() {
        				std::ifstream myfile(stringChoice + choiceS2 + "R.txt");
         			//Checks to make sure that the user is not overwriting a rocket without realizing it. if the file is open, that means that a file already exists when it shouldn't
         			if (myfile.is_open()) {
-          			std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice2 << ". Do you want to overwrite it? 1: Yes, 0: No\n";
-          			std::cin >> choice2;
-          			if (!choice2) {
-            			break;
-         			 	} else {
-           			 	erase_line_rocket(stringChoice + choiceS2.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
-          			}
+          			std::cout << "WARNING, you already have a rocket called: " << stringChoice << " with a code: " << choice2 << ".\n";
+          			//std::cin >> choice2;
+          			//if (!choice2) {
+            		//	break;
+         			 	//} else {
+           			 //	erase_line_rocket(stringChoice + choiceS2.c_str() + "R.txt"); // Removes the old directory from permanent storage to not have multiple directorys for the same overwriten stages
+          			//}
+								std::cout << "Would you like return to the main menu (1), or quit the program (2)?\n";
+       					std::cin >> choice;
+       					if (choice == 1) {
+       					  break;
+       					} else {
+       					  std::cout << "\033[2J\033[0;0H";
+       					  std::cout << "Thank you for using ROCKET-X, Goodbye!\n\n\n";
+       					  return 0;
+       					}
+       					break;								
 							}
 							erase_line_rocket(rocketVector[choice-1].rocketName + choiceBackupS.c_str() + "R.txt");
 							std::fstream rocketNamePermanentStorage;
-        			rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::app);
+        			rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::in);
 							//Reads rocketNamePermanentStorage, then re-writes it back, but swiches names.
 							rocketNamePermanentStorage.clear();
  							rocketNamePermanentStorage.seekg(0);
-							while (getline(rocketNamePermanentStorage, line)) {
+							while (std::getline(rocketNamePermanentStorage, line)) {
 								lines.push_back(line);
 							}
+							rocketNamePermanentStorage.close();
+							rocketNamePermanentStorage.open("RocketName Permanent Storage.txt", std::ios::out);
 							for (int z = 0; z < lines.size(); z ++) {
 								if (lines[z] == stringChoice + std::to_string(rocketVector[choice-1].rocketNumber) + "R.txt") {
-									rocketNamePermanentStorage << lines[z];
+									rocketNamePermanentStorage << lines[z] << std::endl;
 								} else {
 									rocketNamePermanentStorage << stringChoice << choiceS2.c_str() << "R.txt\n";
 									z++;
