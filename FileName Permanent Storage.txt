@@ -1,2 +1,1 @@
-Eagle58.txt
-Electron20.txt
+Proton1.txt

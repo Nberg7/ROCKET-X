@@ -1,0 +1,30 @@
+                ROCKET EXPORT SHEET - CC 222 ROCKET                
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                Details                
+Name: CC 222
+Total Wet mass: 2 Tonnes
+Total Dry mass: 0.5 Tonnes
+Total ∆V: 3126.83 Meters/Second/Second
+Total Thrust: 50 Kilonewtons
+
+                Stages                
+Stage names: Proton
+
+Proton 1
+Wet mass: 2 Tonnes
+Dry mass: 0.5 Tonnes
+Specific Impulse: 230 Seconds
+∆V: 3126.83
+Thrust: 50 Kilonewtons
+
+                In Flight                
+
+Proton 1
+Wet mass: 2 Tonnes
+Dry mass: 0.5 Tonnes
+Specific Impulse: 230 Seconds
+∆V: 3126.83
+Thrust: 50 Kilonewtons
+Acceleration: 25 Meters/Second/Second
+TWR: 2.54929

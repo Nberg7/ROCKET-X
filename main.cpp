@@ -448,9 +448,7 @@ int main() {
     std::cout << "\033[2J\033[0;0H";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     std::cout << "Welcome to ROCKET-X!\n";
-    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
-    std::cout << "This calculator is still in it's early form, so please forgive any lacking features.\n";
-    std::cout << "\nThis calculator has 2 views currently. 1 is calculations and extra details, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open. Enter 3 to quit.\n";
+    std::cout << "\nThis calculator has 2 views. 1 is calculations and extra details, and 2 is stage view. Please enter either 1 or 2 to choose a workspace to open. Enter 3 to quit.\n";
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
     std::cin >> choice;
